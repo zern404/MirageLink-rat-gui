@@ -4,7 +4,7 @@ import time
 
 from modules import main as m
 
-HOST, PORT = 'est-wood.gl.at.ply.gg', 19355
+HOST, PORT = 'suda playit', 0000
 
 def download(s):
     header = s.recv(1024).decode('utf-8').strip()
