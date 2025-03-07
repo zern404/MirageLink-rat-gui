@@ -44,7 +44,7 @@ def download(filename, conn):
 def start_server(HOST, PORT):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
-        s.listen(2)
+        s.listen(10)
         print(f"<---> Ожидание подключения на {HOST}:{PORT}...")
 
         conn, addr = s.accept()
@@ -58,8 +58,12 @@ def start_server(HOST, PORT):
                 if command.lower() == 'exit':
                     break
 
-                elif command.startswith('loadfile'):
-                    filename = command[8:].strip()
+                elif command.startswith('hello'):
+                    conn.send(b'hello')
+
+                elif command.startswith('send'):
+                    filename = command[4:].strip()
+                    print(filename)
                     send(filename, conn)
 
                 elif command.startswith('download'):
@@ -69,9 +73,7 @@ def start_server(HOST, PORT):
                 result = conn.recv(24576).decode('utf-8')
                 print(result)
         s.close()
+        print('<---> Подключения закрыто')
         
 def main():
     start_server(HOST, PORT)
-
-if __name__ == '__main__':
-    main()
