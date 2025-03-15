@@ -2,15 +2,39 @@ import customtkinter as ctk
 import socket
 import pygame
 import os
+import json
 import queue
 import threading
 from tkinter import messagebox
 from tkinter import filedialog
 
-HOST, PORT = '127.0.0.1', 5552
+SETTINGS_FILE = "settings.json"
+DEFAULT_SETTINGS = {
+    "host": "127.0.0.1",
+    "port": 5552,
+    "theme": "default"
+}
 
 pygame.init()
 pygame.mixer.init()
+
+def load_settings():
+    if not os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
+            json.dump(DEFAULT_SETTINGS, file, indent=4, ensure_ascii=False)
+
+    with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+def set_host(host, port):
+    settings = load_settings()
+
+    settings["host"] = host
+    settings["port"] = port
+
+    with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
+        json.dump(settings, file, indent=4, ensure_ascii=False)
+
 
 class Server:
     def __init__(self, host, port, gui):
@@ -182,7 +206,10 @@ class GanjaRATApp(ctk.CTk):
         self.users = []
         self.user_frames = []
 
-        self.server = Server(HOST, PORT, self)
+        self.load = load_settings()
+        self.HOST, self.PORT = self.load['host'], self.load['port']
+
+        self.server = Server(self.HOST, self.PORT, self)
 
         server_thread = threading.Thread(target=self.server.start_server, daemon=True)
         server_thread.start()
@@ -201,11 +228,18 @@ class GanjaRATApp(ctk.CTk):
         self.text_ip = ctk.CTkLabel(self.menu, text='IP', text_color='white', font=('Bold', 20))
         self.text_port = ctk.CTkLabel(self.menu, text='PORT', text_color='white', font=('Bold', 20))
         self.text_contry = ctk.CTkLabel(self.menu, text='CONTRY', text_color='white', font=('Bold', 20))
-        self.builder_btn = ctk.CTkButton(self.menu, height=10, text='BUILD', text_color='red', font=('Bold', 15), fg_color='black', command=self.draw_config_app)
+        self.builder_btn = ctk.CTkButton(self.menu, height=10, width=100, text='BUILD', text_color='red', font=('Bold', 15),
+                                          fg_color='black', command=self.draw_config_app)
+        self.info_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Info', text_color='red', font=('Bold', 15),
+                                          fg_color='black', command=self.draw_info_app)
+        self.setting_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Setting', text_color='red', font=('Bold', 15),
+                                          fg_color='black', command=self.draw_settings_app)
         self.text_ip.pack(side='left', padx=75)
         self.text_port.pack(side='left', padx=75)
         self.text_contry.pack(side='left', padx=75)
-        self.builder_btn.pack(side='right', padx=15)
+        self.builder_btn.pack(side='right', padx=5)
+        self.setting_btn.pack(side='right', padx=5)
+        self.info_btn.pack(side='right', padx=5)
 
     def create_user(self, ip, port, country):
         user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='green', corner_radius=10)
@@ -234,6 +268,14 @@ class GanjaRATApp(ctk.CTk):
         for user in users:
             self.create_user(user["ip"], user["port"], user["country"])
 
+    def draw_settings_app(self):
+        self.setting_app = SettingsApp(self)
+        self.setting_app.grab_set()
+
+    def draw_info_app(self):
+        self.info_app = InfoApp(self)
+        self.info_app.grab_set()
+
     def draw_config_app(self):
         self.config_app = ConfigApp(self) 
         self.config_app.grab_set() 
@@ -241,6 +283,57 @@ class GanjaRATApp(ctk.CTk):
     def draw_func_app(self, ip, port):
         func_app = FunctionApp(ip, port, self.server)
         threading.Thread(target=func_app.mainloop())
+
+
+class SettingsApp(ctk.CTkToplevel): 
+    def __init__(self, parent):
+        super().__init__(parent) 
+
+        self.title("Setting")
+        self.geometry("600x500")
+        self.resizable(False, False)
+
+        self.load = load_settings()
+        self.host, self.port = self.load['host'], self.load['port']
+
+        self.create_host_app()
+
+    def create_host_app(self):
+        self.input_frame = ctk.CTkFrame(self, width=300, corner_radius=10, fg_color="gray30")
+        self.input_frame.pack(side='top', pady=10, padx=10)
+
+        self.label_host = ctk.CTkLabel(self.input_frame, text='Host and port', text_color='green', font=('Bold', 30))
+        self.label_host.pack(side='top', pady=5, padx=10)
+
+        self.input_host = ctk.CTkEntry(self.input_frame, width=300, placeholder_text=f'HOST: {self.host}', font=('Bold', 20), text_color='green')
+        self.input_port = ctk.CTkEntry(self.input_frame, width=300, placeholder_text=f'PORT: {self.port}', font=('Bold', 20), text_color='green')
+        self.input_host.pack(side='top', pady=5, padx=15)
+        self.input_port.pack(side='top', pady=5, padx=15)
+
+        self.set_host_btn = ctk.CTkButton(self.input_frame, width=250, height=40, text='Set', font=('Bold', 30),
+                                           command=self.update_host)
+        self.set_host_btn.pack(padx=10, pady=5)
+    
+    def update_host(self):
+        host = self.input_host.get()
+        port = int(self.input_port.get())
+
+        set_host(host, port)
+
+        self.input_host.delete(0, "end")
+        self.input_port.delete(0, "end")
+
+        self.input_host.configure(placeholder_text=host)
+        self.input_port.configure(placeholder_text=port)
+
+
+class InfoApp(ctk.CTkToplevel): 
+    def __init__(self, parent):
+        super().__init__(parent) 
+
+        self.title("Info")
+        self.geometry("600x500")
+        self.resizable(False, False)
 
 
 class ConfigApp(ctk.CTkToplevel): 
@@ -251,9 +344,9 @@ class ConfigApp(ctk.CTkToplevel):
         self.geometry("600x500")
         self.resizable(False, False)
 
-        self.create_app()
+        self.create_config_app()
 
-    def create_app(self):
+    def create_config_app(self):
         self.login_frame = ctk.CTkFrame(self, fg_color="gray30", corner_radius=10)
         self.login_frame.pack(side='top', pady=40, padx=20, fill="both", expand=True)
 
@@ -338,6 +431,7 @@ class FunctionApp(ctk.CTk):
         self.send_file_btn.pack(side='top', pady=10, padx=50)
         self.send_and_run_btn.pack(side='top', pady=10, padx=50)
         self.console_btn.pack(side='top', pady=10, padx=50)
+
 
         self.fun_tab = self.tabview.tab("Fun")
         

