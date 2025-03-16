@@ -146,6 +146,7 @@ class Server:
                                     break
                                 client["conn"].send(data)  
                         print(f"[+] Файл {filename} отправлен клиенту {ip}:{port}.")
+                        self.send_msg('Файл успешно отправлен')
                     else:
                         client["conn"].send(b"FILE_NOT_FOUND")
                         print(f"[-] Файл {filename} не найден.")
