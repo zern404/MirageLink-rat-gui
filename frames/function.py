@@ -44,7 +44,7 @@ class FunctionApp(ctk.CTk):
         self.blockinput_btn = ctk.CTkButton(self.fun_tab, text='Block keyboard', height=50, width=200,
                                 command=lambda: self.comm.block_input(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
 
-        self.blockinput_btn.pack(side='top', pady=10, padx=50)
+        self.blockinput_btn.place(x=10, y=70)
         self.input_link.place(x=10, y=10)
         self.open_link_btn.place(x=330, y=7)
 

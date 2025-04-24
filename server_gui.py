@@ -77,11 +77,12 @@ class Server(ctk.CTk):
         try:
             with conn:
                 while self.running:
-                    command = conn.recv(1024).decode('utf-8', errors="ignore").strip()
+                    data = conn.recv(1024)
+                    command = data.decode('utf-8', errors="ignore").strip()
                     
                     if not command:
                         break  
-                    
+
                     self.msg_queue.put((addr, command))
 
                     if 'download' in command:
@@ -90,11 +91,10 @@ class Server(ctk.CTk):
                     elif command == "info":
                         info = conn.recv(5000).decode()
                         print(info)
-
         except (ConnectionError, socket.error) as e:
             print(f"Client {addr} disconnected: {e}")
         except (Exception) as e:
-            print(f"can t decode error: {e}")
+            print(f"Handle error: {e}")
         finally:
             print(f"Connection: {addr} closed")
             self.remove_client(addr)
@@ -122,7 +122,7 @@ class Server(ctk.CTk):
                         threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
                     
                     elif message == "remote_desktop":
-                        self.rem_desk = remote_desktop.RemoteDesktop(client["conn"])
+                        self.rem_desk = remote_desktop.RemoteDesktop()
                         threading.Thread(target=self.rem_desk.start, daemon=True).start()
 
                 except Exception as e:
@@ -287,7 +287,7 @@ class MirageApp(ctk.CTk):
 
     def draw_func_app(self, ip, port):
         func_app = function.FunctionApp(ip, port, self.server)
-        threading.Thread(target=func_app.mainloop())
+        threading.Thread(target=func_app.mainloop()).start()
 
 
 class CommandFunction:
