@@ -2,10 +2,11 @@ import json, uuid
 import os
 
 SETTINGS_FILE = "settings.json"
+
 DEFAULT_SETTINGS = {
-    "key": 0,
+    "key": 0,  #don t TOUCH !!!
     "host": "127.0.0.1",
-    "port": 5552,
+    "port": 5000,
     "theme": "default"
 }
 

