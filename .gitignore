@@ -2,5 +2,9 @@
 dist
 build
 
+<<<<<<< HEAD
+=======
+__pycache__
+>>>>>>> master
 *.log
 *.tmp
