@@ -5,20 +5,25 @@ import os
 import time
 import queue
 import threading
+
 from tkinter import messagebox, filedialog
 
 from config import load_settings, create_key
-from frames.plugins import console, remote_tool
+from frames.plugins import console, remote_tool, file_manager
 from frames import (settings, build_config, collect_info,
                     function, info)
 
 
 class Server(ctk.CTk):
-    def __init__(self, host, port, key, gui):
+    def __init__(self, host, port, host_remote, port_remote, key, gui):
         self.host = host 
         self.port = port  
+        self.host_remote = host_remote
+        self.port_remote = port_remote
+
         self.gui = gui  
         self.key = key
+
         self.clients = []  
         self.running = False  
 
@@ -131,7 +136,7 @@ class Server(ctk.CTk):
                     
                     elif message == "remote":
                         print("Remote Tool Activated")
-                        self.remote = remote_tool.RemoteServer()
+                        self.remote = remote_tool.RemoteServer(host=self.host_remote, port=self.port_remote)
                     
                 except Exception as e:
                     print(f"Error sending {ip}:{port}: {e}")
@@ -221,10 +226,11 @@ class MirageApp(ctk.CTk):
         create_key()
         self.load = load_settings()
         self.HOST, self.PORT = self.load['host'], self.load['port']
+        self.host_remote, self.port_remote =self.load['host_remote'], self.load['port_remote']
         self.key = self.load["key"]
 
 
-        self.server = Server(self.HOST, self.PORT, self.key, self)
+        self.server = Server(self.HOST, self.PORT, self.host_remote, self.port_remote, self.key, self)
         server_thread = threading.Thread(target=self.server.start_server, daemon=True)
         server_thread.start()
 
@@ -232,7 +238,7 @@ class MirageApp(ctk.CTk):
 
     def create_app(self):
         self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#4B0082')
-        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='MirageLink - made by GBW!', text_color='black', font=('Bold', 30))
+        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='⚉ MirageLink ⚉ made by: GBW ♥', text_color='black', font=('Bold', 30))
         self.gbw_frame.pack(side='top', fill='x')
         self.gbw_title.pack(side='left', pady=10)
 
@@ -360,7 +366,7 @@ class CommandFunction:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
 
     def file_manager(self, ip, port):
-        print(f"FileManager {ip} {port}")
+        file_app = file_manager.FileManagerApp(ip, port, self.server)
 
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()

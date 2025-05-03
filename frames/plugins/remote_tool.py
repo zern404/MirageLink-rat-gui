@@ -2,7 +2,7 @@ import socket, struct, threading, tkinter as tk, cv2, pyaudio, numpy as np
 from pynput import mouse
 
 class RemoteServer:
-    def __init__(self, host='127.0.0.1', port=5000):
+    def __init__(self, host='127.0.0.1', port=6000):
         self.conn = None
         self.client_width = 1920
         self.client_height = 1080
