@@ -1,0 +1,8 @@
+{
+    "key": "36408479-0dd0-466f-acf0-48bd8b460f2c",
+    "host": "127.0.0.1",
+    "port": 5000,
+    "host_remote": "127.0.0.1",
+    "port_remote": 6000,
+    "theme": "default"
+}

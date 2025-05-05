@@ -4,6 +4,7 @@ import pygame
 import os
 import time
 import queue
+import json
 import threading
 
 from tkinter import messagebox, filedialog
@@ -85,15 +86,23 @@ class Server(ctk.CTk):
                     
                     if not command:
                         break  
+                    
+                    
 
-                    self.msg_queue.put((addr, command))
-
+                    """
                     if 'download' in command:
                         threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
+                    """
+                    if command.startswith("FILE"):
+                        pass
                     
                     elif command == "info":
                         info = conn.recv(5000).decode()
                         print(info)
+
+                    else:
+                        self.msg_queue.put((addr, command))
+
         except (ConnectionError, socket.error) as e:
             print(f"Client {addr} disconnected: {e}")
         except (Exception) as e:
@@ -173,7 +182,7 @@ class Server(ctk.CTk):
         for client in self.clients:
             if client["ip"] == ip and client["port"] == port:
                 try:
-                    client["conn"].send(b"SEND_FILE")
+                    #client["conn"].send(b"SEND_FILE")
 
                     header = client["conn"].recv(1024).decode('utf-8').strip()
                     if header.startswith("FILE"):
@@ -217,7 +226,7 @@ class MirageApp(ctk.CTk):
         self.geometry("1000x500")
         self.resizable(False, True)
         ctk.set_appearance_mode("dark")
-        ctk.set_default_color_theme("green")
+        ctk.set_default_color_theme("dark-blue")
 
         self.users = []
         self.user_frames = []
@@ -366,7 +375,11 @@ class CommandFunction:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
 
     def file_manager(self, ip, port):
-        file_app = file_manager.FileManagerApp(ip, port, self.server)
+        threading.Thread(target=self.server.send_to_client, args=(ip, port, "file start")).start()
+
+        addr, files_json = self.server.msg_queue.get()
+        files_list = json.loads(files_json)
+        self.file_app = file_manager.FileManagerApp(ip, port, self.server, files_list)
 
     def download_file(self, ip, port, filename):
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()
