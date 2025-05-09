@@ -92,7 +92,7 @@ class Server(ctk.CTk):
                     
                     elif command == "info":
                         info = conn.recv(5000).decode()
-                        print(info)
+                        collect_info.CollectionsInfo(info)
 
                     else:
                         self.msg_queue.put((addr, command))
