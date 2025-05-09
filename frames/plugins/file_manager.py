@@ -47,6 +47,7 @@ class FileManagerApp(ctk.CTkToplevel):
 
         menu = tk.Menu(self, tearoff=0)
         menu.add_command(label="Download", command=lambda: self.download_file(file_name))
+        menu.add_command(label="Download", command=lambda: self.run_file(file_name))
         menu.add_command(label="Delete", command=lambda: self.delete_file(file_name))
 
         def on_right_click(event):
@@ -84,12 +85,16 @@ class FileManagerApp(ctk.CTkToplevel):
     def download_file(self, file_name):
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                             f'file download {file_name}'), daemon=True).start()
-        threading.Thread(target=self.server.download_file, args=("data", self.ip, self.port), daemon=True).start()
+
+    def run_file(self, file_name):
+        threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
+                                                            f'file run {file_name}'), daemon=True).start()
 
     def delete_file(self, file_name):
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                             f'file delete {file_name}'), daemon=True).start()
         self.data.remove(file_name)
+        print(self.data)
         self.file_builder(self.data)
 
     def set_folder(self, folder_name):

