@@ -11,7 +11,7 @@ class InfoApp(ctk.CTkToplevel):
         self.create_info_app()
 
     def create_info_app(self):
-        self.info_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=15, fg_color='gray30')
+        self.info_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=15, fg_color='#1e1f26')
         self.info_frame.pack(pady=10, padx=10, fill='both', expand=True)
 
         self.title_info = ctk.CTkLabel(self.info_frame, text='INFORMATION', font=('Bold', 50))

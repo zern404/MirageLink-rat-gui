@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import threading
+import soundpad
 from tkinter import messagebox
 
 from builder_clients.data_client.build import build_client
@@ -16,22 +17,22 @@ class BuildConfigApp(ctk.CTkToplevel):
         self.create_config_app()
 
     def create_config_app(self):
-        self.login_frame = ctk.CTkFrame(self, fg_color="gray30", corner_radius=10)
+        self.login_frame = ctk.CTkFrame(self, fg_color="#1e1f26", corner_radius=10)
         self.login_frame.pack(side='top', pady=10, padx=10, fill="both", expand=True)
 
-        self.login_title = ctk.CTkLabel(self.login_frame, text='Build config file', text_color='green', font=('Bold', 60))
+        self.login_title = ctk.CTkLabel(self.login_frame, text='Build client', text_color='white', font=('Bold', 40))
         self.login_title.pack(side='top', pady=10)
 
-        self.entry_ip = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="IP", text_color='green', font=('Bold', 50))
+        self.entry_ip = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="IP", text_color='blue', font=('Bold', 50))
         self.entry_ip.pack(pady=5, padx=20)
 
-        self.entry_port = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="PORT", text_color='green', font=('Bold', 50))
+        self.entry_port = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="PORT", text_color='blue', font=('Bold', 50))
         self.entry_port.pack(pady=5, padx=20)
 
-        self.entry_ip_2 = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="IP 2", text_color='green', font=('Bold', 50))
+        self.entry_ip_2 = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="IP 2", text_color='blue', font=('Bold', 50))
         self.entry_ip_2.pack(pady=5, padx=20)
 
-        self.entry_port_2 = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="PORT 2", text_color='green', font=('Bold', 50))
+        self.entry_port_2 = ctk.CTkEntry(self.login_frame, width=500, height=25, placeholder_text="PORT 2", text_color='blue', font=('Bold', 50))
         self.entry_port_2.pack(pady=5, padx=20)
 
         self.btn = ctk.CTkButton(self.login_frame, width=300, height=50, text="Enter", command=self.remove_frame)
@@ -50,6 +51,8 @@ class BuildConfigApp(ctk.CTkToplevel):
             return False
 
     def remove_frame(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
+
         sett = load_settings()
 
         key = sett["key"]

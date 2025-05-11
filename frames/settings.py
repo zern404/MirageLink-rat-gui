@@ -17,7 +17,7 @@ class SettingsApp(ctk.CTkToplevel):
         self.create_host_app()
 
     def create_host_app(self):
-        self.input_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=10, fg_color="gray30")
+        self.input_frame = ctk.CTkFrame(self, width=600, height=500, corner_radius=10, fg_color="#1e1f26")
         self.input_frame.pack(side='top', pady=10, padx=10, expand=True, fill='both')
 
         self.label_host = ctk.CTkLabel(self.input_frame, text='Host and port', text_color='white', font=('Bold', 40))

