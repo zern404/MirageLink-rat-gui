@@ -67,8 +67,8 @@ class FileManagerApp(ctk.CTkToplevel):
         for i in range(len(files)):
             self.create_file(files[i])
 
+    @soundpad.play_click()
     def back(self):
-        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                                    'file back'), daemon=True).start()
         addr, new_files_json = self.server.msg_queue.get()
@@ -76,8 +76,8 @@ class FileManagerApp(ctk.CTkToplevel):
 
         self.file_builder(files_list)
 
+    @soundpad.play_click()
     def forward(self):
-        threading.Thread(target=soundpad.click(), daemon=True).start()
         threading.Thread(target=self.server.send_to_client, args=(self.ip, self.port,
                                                                    'file forward'), daemon=True).start()
         addr, new_files_json = self.server.msg_queue.get()

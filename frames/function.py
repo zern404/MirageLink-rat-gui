@@ -1,29 +1,31 @@
 import customtkinter as ctk
+import soundpad
 from server_gui import CommandFunction
 
 class FunctionApp(ctk.CTk):
     def __init__(self, ip, port, server):
         super().__init__()
+        
+        self.title("Function")
+        self.geometry("600x500")
 
         self.ip = ip
         self.port = port
         self.server = server
+        self.comm = CommandFunction(self.server)#need for execute command from gui
 
-        self.title("Function")
-        self.geometry("600x500")
-        
-        self.comm = CommandFunction(self.server)
         self.create_func_app()
 
     
     def create_func_app(self):
         self.gbw_func_frame = ctk.CTkFrame(self, width=600, height=60, fg_color='#1e1f26')
         self.gbw_func_title = ctk.CTkLabel(self.gbw_func_frame, text=f'Func for target: {self.ip}', text_color='white', font=('Bold', 25))
+        
+        self.tabview = ctk.CTkTabview(self)
+        
+        self.tabview.pack(side='top', fill='both', expand=True)
         self.gbw_func_frame.pack(side='top', fill='x')
         self.gbw_func_title.pack(side='top', pady=10)
-
-        self.tabview = ctk.CTkTabview(self)
-        self.tabview.pack(side='top', fill='both', expand=True)
 
         self.tabview.add("Fun")
         self.tabview.add("System")
@@ -32,9 +34,10 @@ class FunctionApp(ctk.CTk):
 
         self.add_content_to_tabs()
 
-    def add_content_to_tabs(self):
-        self.fun_tab = self.tabview.tab("Fun")
 
+    def add_content_to_tabs(self):
+        "FUN TAB"
+        self.fun_tab = self.tabview.tab("Fun")
         self.input_link = ctk.CTkEntry(self.fun_tab, width=300, height=40, placeholder_text='Enter a link', font=('Bold', 20), text_color='blue')
 
         self.open_link_btn = ctk.CTkButton(self.fun_tab, text="Open Link", height=50, width=200,
@@ -79,6 +82,7 @@ class FunctionApp(ctk.CTk):
         self.send_devilmsg_btn.place(x=435, y=200)
 
 
+        "SYSTEM TAB"
         self.sys_tab = self.tabview.tab("System")
         self.console_btn = ctk.CTkButton(self.sys_tab, text='Reverse Shell', height=50, width=200,
                                 command=lambda: self.comm.console(self.ip, self.port), font=('Bold', 15), fg_color='#283655')
@@ -110,6 +114,7 @@ class FunctionApp(ctk.CTk):
         self.remote_btn.place(x=330, y=10)
         
 
+        "FILES TAB"
         self.file_tab = self.tabview.tab("Files")
         self.send_and_run_btn = ctk.CTkButton(self.file_tab, text='Run File From Disk', height=50, width=200,
                                        command=lambda: self.comm.send_and_run(self.ip, self.port), font=('Bold', 15), fg_color='#283655')
@@ -126,11 +131,13 @@ class FunctionApp(ctk.CTk):
         self.send_and_run_btn.pack(side='top', pady=10, padx=50)
         
 
+        "INFO TAB"
         self.info_tab = self.tabview.tab("Info")
         self.get_info_btn = ctk.CTkButton(self.info_tab, text='Get Info', height=50, width=200,
                                        command=lambda: self.comm.get_info(self.ip, self.port), font=('Bold', 15), fg_color='#283655')
         
         self.get_info_btn.pack(side='top', pady=10, padx=50)
 
+    @soundpad.play_click()
     def show_tab(self, tab_name):
         self.tabview.set(tab_name)

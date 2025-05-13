@@ -13,6 +13,7 @@ DEFAULT_SETTINGS = {
 }
 
 def create_key():
+    "This create secret key"
     try:
         data = load_settings()
         if data["key"] == 0:
