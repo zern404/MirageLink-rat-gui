@@ -9,7 +9,6 @@ DEFAULT_SETTINGS = {
     "port": 5000,
     "host_remote": "127.0.0.1",
     "port_remote": 6000,
-    "theme": "default"
 }
 
 def create_key():

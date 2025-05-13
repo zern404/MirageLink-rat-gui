@@ -69,7 +69,7 @@ class BuildConfigApp(ctk.CTkToplevel):
         self.destroy()
         
         if build:
-            threading.Thread(target=messagebox.showinfo, args=('MirageLink', 'Created client...'), daemon=True).start()
+            threading.Thread(target=messagebox.showinfo, args=('MirageLink', 'Select dir for save'), daemon=True).start()
             threading.Thread(target=build_client, daemon=True).start()
         else:
             messagebox.showerror('MirageLink', 'Build client Error')
