@@ -22,10 +22,10 @@ This code may only be used in **testing labs** for **pentesting** or with explic
 
 <h1>To start, read the file on how to begin using it.</h1>
 <br>
-<h2>The project is still very raw, I will constantly update it and bring it to perfection.</h2>
+<h2>The project is still very raw, I will constantly update it and bring it to perfection. ONLY RUN with the virtual environment activated - python server_gui.py</h2>
 <h1>Briefly, how it all works - the TCP protocol is used, in order for the client to be able to connect to the server, it must send a secret key that the server generates when the program is first launched.</h1>
 <br>
-<h1>Как запустить? Прочитайте файл How to start using, там подробно написано.</h1>
+<h1>Как запустить? Прочитайте файл How to start using, там подробно написано. ТОЛЬКО ЗАПУСКАТЬ с включеным виртуальным окружениям - python server_gui.py</h1>
 <br>
 <h2>Проект еще очень сырой, буду постоянно обновлять его и доводить до идеала.</h2>
 <h1>Кратко, как все работает - используеться протокол TCP, для того чтобы клиент смог подключиться к серверу он должен прислать секретный ключ, который сервер генерирует при первом запуске програмы.</h1>
