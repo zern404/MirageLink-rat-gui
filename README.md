@@ -20,26 +20,12 @@ This code may only be used in **testing labs** for **pentesting** or with explic
 
 ⚠️ **Важно**: Использование кода в нарушении закона может повлечь уголовную ответственность.
 
-<h1>How to use</h1>
-<h1>Important! Do everything in order to make it work!</h1>
-<h2>Install python 3.13.0 https://www.python.org</h2>
-<h2>Create a virtual environment in the project folder: python -m venv .venv</h2>
-<h2>Activate it: .venv/scripts/activate</h2>
-<h2>Now install dependencies: pip install pyautogui psutil pywin32 opencv-python aiofiles mss numpy pyaudio pycryptodome pyinstaller colorama mouse keyboard</h2>
-<h2>pip install --upgrade pyautogui pyscreeze pillow mouse keyboard</h2>
+<h1>To start, read the file on how to begin using it.</h1>
 <br>
 <h2>The project is still very raw, I will constantly update it and bring it to perfection.</h2>
 <h1>Briefly, how it all works - the TCP protocol is used, in order for the client to be able to connect to the server, it must send a secret key that the server generates when the program is first launched.</h1>
-<h1>In the future, this key will be embedded and encrypted in the client when it is built. This nuance must be known in advance</h1>
 <br>
-<h1>Как запустить</h1>
-<h1>Важно! Делайте все по порядку чтобы работало!</h1>
-<h2>Установите python 3.13.0 https://www.python.org</h2>
-<h2>Создайте виртуальное окружение в папке проекта: python -m venv .venv</h2>
-<h2>Активируйте его: .venv/scripts/activate</h2>
-<h2>Теперь установите зависимости: pip install pyautogui psutil pywin32 opencv-python aiofiles mss numpy pyaudio pycryptodome pyinstaller colorama mouse keyboard</h2>
-<h2>pip install --upgrade pyautogui pyscreeze pillow</h2>
+<h1>Как запустить? Прочитайте файл How to start using, там подробно написано.</h1>
 <br>
 <h2>Проект еще очень сырой, буду постоянно обновлять его и доводить до идеала.</h2>
 <h1>Кратко, как все работает - используеться протокол TCP, для того чтобы клиент смог подключиться к серверу он должен прислать секретный ключ, который сервер генерирует при первом запуске програмы.</h1>
-<h1>В будущем - этот ключ будет вшиваться и криптиться в клиенте при билде его. Этот нюанс нужно знать заранее</h1>
