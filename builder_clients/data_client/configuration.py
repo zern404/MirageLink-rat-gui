@@ -1,0 +1,5 @@
+IP = '127.0.0.1'
+PORT = 5000
+IP_REMOTE = '127.0.0.1'
+PORT_REMOTE = 6000
+KEY = 'c9c0c871-cee9-4abb-9dd3-c56f6675f5a7'
