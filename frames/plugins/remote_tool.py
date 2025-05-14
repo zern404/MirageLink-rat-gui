@@ -27,11 +27,11 @@ class RemoteServer:
         self.gui.run()
 
     def start_listening(self, host, port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind((host, port))
-        sock.listen(1)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((host, port))
+        self.sock.listen(1)
         print(f"Remote - listening on {host}:{port}…")
-        self.conn, _ = sock.accept()
+        self.conn, _ = self.sock.accept()
         print("Remote - client connected")
 
     def send(self, typ: bytes, data: bytes):
@@ -43,62 +43,67 @@ class RemoteServer:
         self.send(b'C', cmd.encode())
 
     def receive_loop(self):
-        while True:
-            try:
-                hdr = self.conn.recv(1)
-                if not hdr:
+        try:
+            while True:
+                try:
+                    hdr = self.conn.recv(1)
+                    if not hdr:
+                        break
+
+                    length = struct.unpack('>I', self.conn.recv(4))[0]
+                    payload = self._recv_all(length)
+
+                    if hdr == b'D':  
+                        img = cv2.imdecode(
+                            np.frombuffer(payload, np.uint8), 
+                            cv2.IMREAD_COLOR
+                        )
+                        
+                        if img is None:
+                            print("Failed to decode desktop frame")
+                            continue
+
+                        img = self.resize_keep_aspect_ratio(img, 1200, 800)
+                        self.current_frame_width = img.shape[1]
+                        self.current_frame_height = img.shape[0]
+
+                        final_frame = np.zeros((800, 1200, 3), dtype=np.uint8)
+                        x_offset = (1200 - img.shape[1]) // 2
+                        y_offset = (800 - img.shape[0]) // 2
+                        final_frame[
+                            y_offset:y_offset+img.shape[0], 
+                            x_offset:x_offset+img.shape[1]
+                        ] = img
+
+                        cv2.imshow("Remote Desktop", final_frame)
+                        if cv2.waitKey(1) & 0xFF == ord('q'): 
+                            break
+
+                    elif hdr == b'W' and self.gui.is_cam_on:  
+                        img = cv2.imdecode(
+                            np.frombuffer(payload, np.uint8), 
+                            cv2.IMREAD_COLOR
+                        )
+                        if img is not None:
+                            cv2.imshow("Webcam", img)
+                            cv2.waitKey(1)
+
+                    elif hdr == b'A' and self.gui.is_mic_on: 
+                        self.audio_stream.write(payload)
+
+                    elif hdr == b'R': 
+                        w, h = payload.decode().split(',')
+                        self.client_width = int(w)
+                        self.client_height = int(h)
+                        print(f"Updated client resolution: {w}x{h}")
+
+                except Exception as e:
+                    print(f"Receive loop error: {e}")
+                    self.conn.close()
                     break
-
-                length = struct.unpack('>I', self.conn.recv(4))[0]
-                payload = self._recv_all(length)
-
-                if hdr == b'D':  
-                    img = cv2.imdecode(
-                        np.frombuffer(payload, np.uint8), 
-                        cv2.IMREAD_COLOR
-                    )
-                    
-                    if img is None:
-                        print("Failed to decode desktop frame")
-                        continue
-
-                    img = self.resize_keep_aspect_ratio(img, 1200, 800)
-                    self.current_frame_width = img.shape[1]
-                    self.current_frame_height = img.shape[0]
-
-                    final_frame = np.zeros((800, 1200, 3), dtype=np.uint8)
-                    x_offset = (1200 - img.shape[1]) // 2
-                    y_offset = (800 - img.shape[0]) // 2
-                    final_frame[
-                        y_offset:y_offset+img.shape[0], 
-                        x_offset:x_offset+img.shape[1]
-                    ] = img
-
-                    cv2.imshow("Remote Desktop", final_frame)
-                    cv2.waitKey(1)
-
-                elif hdr == b'W' and self.gui.is_cam_on:  
-                    img = cv2.imdecode(
-                        np.frombuffer(payload, np.uint8), 
-                        cv2.IMREAD_COLOR
-                    )
-                    if img is not None:
-                        cv2.imshow("Webcam", img)
-                        cv2.waitKey(1)
-
-                elif hdr == b'A' and self.gui.is_mic_on: 
-                    self.audio_stream.write(payload)
-
-                elif hdr == b'R': 
-                    w, h = payload.decode().split(',')
-                    self.client_width = int(w)
-                    self.client_height = int(h)
-                    print(f"Updated client resolution: {w}x{h}")
-
-            except Exception as e:
-                print(f"Receive loop error: {e}")
-                self.conn.close()
-                break
+        finally:
+            cv2.destroyAllWindows()
+            cv2.waitKey(1) 
 
     def _recv_all(self, n):
         data = b''
@@ -208,6 +213,8 @@ class ServerGUI:
 
     def on_close(self):
         self.server.conn.close()
+        self.server.sock.close()
+        cv2.destroyAllWindows()
         self.root.destroy()
 
     def run(self):

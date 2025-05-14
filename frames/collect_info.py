@@ -7,6 +7,7 @@ class CollectionsInfo(ctk.CTkToplevel):
         self.title("Info")
         self.geometry("600x500")
         self.resizable(False, False)
+        
         self.info = info
 
         self.create_info_app()

@@ -1,0 +1,57 @@
+|RU|
+
+Приветствую тебя друг!
+
+Чтобы начать пользоваться мышкой вам нужно сделать парочку простых действий чтобы все заработало -
+
+1.Скачать python 3.13 и playit чтобы открыть порты и можно было удаленно пользоваться а не локально.
+
+2.Открыть терминал в папке с программой и дальше вводить следующие команды
+	Установить виртуальное окружения - python -m venv venv
+	Активировать его - venv/scripts/activate
+	Установить зависимости - pip install -r requirements.txt
+	Дождитесь установки и можете запускать файл run.bat
+
+3.Создание клиента - заходим в интерфейсе в вкладку build и вводим туда айпи плейита, предварительно вы должны создать 2 тунеля на порты которые использует рат,
+а именно: 5000 и 6000 порт - это порты которые по дефолту, вы можете указать туда свои порты в вкладке Settings и если будете менять то ставьте в айпи localhost.
+
+Вернемся к созданию клиента вводим айпи и порт из плейита, это важно, чтобы все работало... Ждем компиляцию и все можно использовать.
+
+
+ВНИМАНИЕ!!!
+Хотелось бы отметить что это бета, и поэтому есть баги и некоторые моменты временно не работают. Я делал упор на то что какой бы баг не был, вы не потеряли юзера.
+Еще на данном моменте нужно знать - если что то пошло не так или что то не работает, просто перезапускайте рат.
+Не удаляйте файл settings.json иначе юзеры слетят, там уникальный ключ по которому есть доступ к ратке
+
+
+
+|EN|
+
+Greetings, my friend!
+
+To start using the rat, you need to perform a couple of simple actions to get everything working - 
+
+1. Download Python 3.13 and Playit to open the ports so you can use it remotely instead of locally. 
+
+2. Open the terminal in the folder with the program and then enter the following commands.
+	Set up a virtual environment - python -m venv venv
+	Activate it - venv/scripts/activate
+	Install the dependencies - pip install -r requirements.txt
+	Wait for the installation and you can run the file run.bat.
+
+3. Creating a client - go to the build tab in the interface and enter the play's IP address, you must first create 2 tunnels for the ports that rat uses, namely: port 5000 and port 6000 - these are the default ports, you can specify your own ports in the Settings tab, and if you change them, set the IP to localhost.
+
+Let's return to creating the client by entering the IP and port from the play, it's important for everything to work... We wait for the compilation and everything can be
+ 
+
+WARNING!!!
+I would like to note that this is a beta, and therefore there are bugs and some things are temporarily not working.
+I emphasized that no matter what bug it is, you did not lose the user.Also, at this moment, you need to know - if something went wrong or something is not working, just restart the rat.
+Do not delete the settings.json file, otherwise the users will lose access, as there is a unique key that grants access to the backend.
+
+
+
+
+
+
+

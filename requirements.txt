@@ -1,0 +1,17 @@
+pyautogui
+psutil
+pywin32
+customtkinter
+pygame
+opencv-python
+aiofiles
+pynput
+mss
+numpy
+pyaudio
+pycryptodome
+pyinstaller
+colorama
+mouse
+keyboard
+nuitka
